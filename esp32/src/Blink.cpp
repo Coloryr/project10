@@ -1,13 +1,15 @@
 #include <Arduino.h>
-#include <lvgl.h>
-#include "BLE.h"
+// #include <lvgl.h>
+// #include "BLE.h"
+#include "FFT.h"
 
 void setup()
 {
-    setupBLE();
+    Serial.begin(115200);
+    // setupBLE();
 }
 
 void loop()
 {
-    loopBLE();
+    ffttest();
 }

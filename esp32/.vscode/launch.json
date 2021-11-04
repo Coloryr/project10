@@ -12,21 +12,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "G:/code/project10/esp32/.pio/build/esp wrover kit/firmware.elf",
-            "projectEnvName": "esp wrover kit",
+            "executable": "G:/code/project10/esp32/.pio/build/nodemcu-32s/firmware.elf",
+            "projectEnvName": "nodemcu-32s",
             "toolchainBinDir": "C:/Users/40206/.platformio/packages/toolchain-xtensa32@2.50200.97/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
-                "task": "Pre-Debug (esp wrover kit)"
+                "task": "Pre-Debug"
             }
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "G:/code/project10/esp32/.pio/build/esp wrover kit/firmware.elf",
-            "projectEnvName": "esp wrover kit",
+            "executable": "G:/code/project10/esp32/.pio/build/nodemcu-32s/firmware.elf",
+            "projectEnvName": "nodemcu-32s",
             "toolchainBinDir": "C:/Users/40206/.platformio/packages/toolchain-xtensa32@2.50200.97/bin",
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -34,8 +34,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "G:/code/project10/esp32/.pio/build/esp wrover kit/firmware.elf",
-            "projectEnvName": "esp wrover kit",
+            "executable": "G:/code/project10/esp32/.pio/build/nodemcu-32s/firmware.elf",
+            "projectEnvName": "nodemcu-32s",
             "toolchainBinDir": "C:/Users/40206/.platformio/packages/toolchain-xtensa32@2.50200.97/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
