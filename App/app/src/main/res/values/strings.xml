@@ -2,6 +2,6 @@
     <string name="app_name">PhoneApp</string>
     <string name="action_settings">连接设置</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">测量显示</string>
-    <string name="second_fragment_label">设备列表</string>
+    <string name="first_fragment_label">设备列表</string>
+    <string name="second_fragment_label">测量显示</string>
 </resources>

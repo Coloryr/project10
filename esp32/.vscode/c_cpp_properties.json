@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/40206/Documents/PlatformIO/Projects/211104-100639-arduino-blink/include",
-                "C:/Users/40206/Documents/PlatformIO/Projects/211104-100639-arduino-blink/src",
+                "G:/code/project10/esp32/include",
+                "G:/code/project10/esp32/src",
                 "C:/Users/40206/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/config",
                 "C:/Users/40206/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_trace",
                 "C:/Users/40206/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_update",
@@ -106,8 +106,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/40206/Documents/PlatformIO/Projects/211104-100639-arduino-blink/include",
-                    "C:/Users/40206/Documents/PlatformIO/Projects/211104-100639-arduino-blink/src",
+                    "G:/code/project10/esp32/include",
+                    "G:/code/project10/esp32/src",
                     "C:/Users/40206/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/config",
                     "C:/Users/40206/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_trace",
                     "C:/Users/40206/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_update",

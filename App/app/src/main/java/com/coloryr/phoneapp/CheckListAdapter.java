@@ -1,6 +1,7 @@
 package com.coloryr.phoneapp;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,15 +13,15 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
-public class CheckListAdapter extends ArrayAdapter<String> {
+public class CheckListAdapter extends ArrayAdapter<BluetoothDevice> {
 
-    public class ViewHolder {
+    public static class ViewHolder {
         public TextView name;
     }
 
     private final int resourceId;
 
-    public CheckListAdapter(Context context, int headImage, List<String> obj) {
+    public CheckListAdapter(Context context, int headImage, List<BluetoothDevice> obj) {
         super(context, headImage, obj);
         resourceId = headImage;
     }
@@ -29,7 +30,7 @@ public class CheckListAdapter extends ArrayAdapter<String> {
     @NonNull
     @Override
     public View getView(final int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        String item = getItem(position);
+        BluetoothDevice item = getItem(position);
         View view;
         ViewHolder viewHolder;
         if (convertView == null) {
@@ -46,7 +47,7 @@ public class CheckListAdapter extends ArrayAdapter<String> {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        viewHolder.name.setText(item);
+        viewHolder.name.setText(item.getName());
         return view;
     }
 }
