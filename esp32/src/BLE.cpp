@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "BLE.h"
-#include "FFT.h"
 #include "utils.h"
+#include "RBLE.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -96,7 +96,6 @@ void setupBLE()
 
 void go()
 {
-    ffttest();
     uint32_t time = millis();
     String temp1 = command2 + String(THD, 6);
     txC->setValue(temp1.c_str());
@@ -123,7 +122,7 @@ void go()
     txC->notify();
     delay(10);
 
-    uint8_t *data2 = (uint8_t *)malloc(sizeof(uint8_t) * (1600));
+    uint8_t data2[1600];
 
     uint16_t all;
 
@@ -146,9 +145,9 @@ void go()
         all = points * 2;
     }
 
-    char *buf = (char *)malloc(sizeof(char) * 10);
+    char buf[10];
     uint16_t size = sprintf(buf, "%d", all);
-    char *buf1 = (char *)malloc(sizeof(char) * 7 + size);
+    char buf1[20];
     for (uint16_t i = 0; i < 7; i++)
     {
         buf1[i] = command1[i];
@@ -177,10 +176,6 @@ void go()
             break;
         }
     }
-
-    free(buf);
-    free(buf1);
-    free(data2);
 
     Serial.print(millis() - time);
     Serial.println(" ms");

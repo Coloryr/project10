@@ -30,8 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Energia.h>
-#include <wiring_private.h>
+#include "Energia.h"
 
 #include <xdc/runtime/Timestamp.h>
 #include <xdc/runtime/Types.h>
@@ -138,26 +137,6 @@ void delay(uint32_t milliseconds)
 
     /* timeout is always in milliseconds so that Clock_workFunc() behaves properly */
     Task_sleep(milliseconds);
-}
-
-/*
- *  ======== getSpiInfo ========
- *
- *  A hack to work around spiPolling only being supported
- *  in SPI_MODE_BLOCKING. Remove if/when this is resolved
- *  in the SPI drivers.
- */
-void getSpiInfo(void *spi, SpiInfo *spiInfo)
-{
-    SPIMSP432E4DMA_Object *obj;
-    SPIMSP432E4DMA_HWAttrs const *hwAttrs;
-    SPI_Handle spiHandle = (SPI_Handle)spi;
-
-    obj = (SPIMSP432E4DMA_Object *)(spiHandle->object);
-    hwAttrs = (SPIMSP432E4DMA_HWAttrs *)(spiHandle->hwAttrs);
-
-    spiInfo->transferModePtr = &obj->transferMode;
-    spiInfo->minDmaTransferSize = hwAttrs->minDmaTransferSize;
 }
 
 /*

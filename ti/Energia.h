@@ -42,8 +42,6 @@
 #include "avr/pgmspace.h"
 #include "avr/interrupt.h"
 
-#include "binary.h"
-
 #include <xdc/runtime/System.h>
 
 #include <ti/sysbios/BIOS.h>
@@ -51,9 +49,8 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/gates/GateMutex.h>
 
-#include <Board.h>
-
-#include "HardwareSerial.h"
+#include "stdio.h"
+#include "printf.h"
 
 //#define _POSIX_SOURCE /* prevent conflicting #defines of FD_SET, fd_set, ... from arm compiler's sys/types.h and simplelink.h */
 
@@ -122,21 +119,6 @@ typedef unsigned int word;
 
 #define bit(b) (1UL << (b))
 
-void init(void);
-
-unsigned long getCpuFrequency(void);
-void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val);
-uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder);
-unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout);
-void pinMode(uint8_t, uint8_t);
-void digitalWrite(uint8_t, uint8_t);
-int digitalRead(uint8_t);
-uint16_t analogRead(uint8_t);
-void analogWrite(uint8_t, int);
-void analogReference(uint16_t);
-void analogFrequency(uint32_t);
-void analogReadResolution(uint16_t);
-
 void delay(uint32_t milliseconds);
 
 /* Implemented in wiring.c */
@@ -159,32 +141,14 @@ void enablePinInterrupt(uint8_t pin);
 void interrupts(void);
 void noInterrupts(void);
 
+void senddata(char* data);
+void senddata1(char* data, uint32_t size);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
 #ifdef __cplusplus
-#include "WCharacter.h"
-#include "HardwareSerial.h"
-
-uint16_t makeWord(uint16_t w);
-uint16_t makeWord(byte h, byte l);
-
-#define word(...) makeWord(__VA_ARGS__)
-
-unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout = 1000000L);
-
-void tone(uint8_t _pin, unsigned int frequency, unsigned long duration = 0);
-void noTone(uint8_t _pin);
-
-// WMath prototypes
-long random(long);
-long random(long, long);
-void randomSeed(unsigned int);
-long map(long, long, long, long, long);
-
 #endif
-
-#include "pins_energia.h"
 
 #endif

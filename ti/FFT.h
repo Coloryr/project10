@@ -16391,6 +16391,7 @@ const int16_t data[] = {
 
 void ffttest();
 
+extern float baseFrequency[5];
 extern uint16_t points;
 extern float range[5];
 extern float THD;

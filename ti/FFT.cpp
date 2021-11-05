@@ -4,7 +4,6 @@
 #include "utils.h"
 #include "Energia.h"
 
-arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
 /*
 These values can be changed in order to evaluate the functions
 */
@@ -67,15 +66,16 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             (abscissa > (baseFrequency[3] - 300) && abscissa < (baseFrequency[3] + 300)) ||
             (abscissa > (baseFrequency[4] - 300) && abscissa < (baseFrequency[4] + 300)))
         {
-            Serial.printf("index: %d ", i);
-            Serial.print(abscissa, 6);
+            printf1("index: %d ", i);
+            printf1("%f", abscissa);
             if (scaleType == SCL_FREQUENCY)
-                Serial.print("Hz");
-            Serial.print(" ");
-            Serial.println(vData[i], 4);
+                printf1(0,"Hz");
+            printf1(" ");
+            printf1("%f", vData[i]);
+            printf1("\r");
         }
     }
-    Serial.println();
+    printf1("\r");
 }
 
 float res[240];
@@ -83,7 +83,7 @@ float res[240];
 void showpoint()
 {
     points = samplingFrequency / baseFrequency[0];
-    Serial.printf("points: %d\n", points);
+    printf1("points: %d\r", points);
     if (points > 100)
     {
         uint16_t g = (points / 240) + 1;
@@ -109,14 +109,23 @@ void showpoint()
 
 void ffttest()
 {
+    printf1("fft init1\r");
+
+    arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
     sinx_init();
     unsigned long time = millis();
     /* Build raw data */
+
+    printf1("fft init2\r");
+
     for (uint16_t i = 0; i < samples; i++)
     {
         vReal[i] = (float)data[i] / (4096 / 10); /* Build data with positive and negative values*/
         vImag[i] = 0.0;                          //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
+
+    printf1("fft Compute\r");
+
     FFT.DCRemoval(vReal, samples);
     FFT.Windowing(vReal, samples, FFT_WIN_TYP_HANN, FFT_FORWARD); /* Weigh data */
     FFT.Compute(vReal, vImag, samples, FFT_FORWARD);              /* Compute FFT */
@@ -170,9 +179,9 @@ void ffttest()
 //    Serial2.printf("t7.txt=\"%.5f\"", range[4]);
 //    Serial2.write(eData, 3);
 //
-    Serial.print(millis() - time);
-    Serial.println(" ms");
+    printf1("%d", millis() - time);
+    printf1(" ms\r");
 
-    Serial.printf("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\n",
+    printf1("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\r",
                   baseFrequency[0], range[0], range[1], range[2], range[3], range[4], THD, '%');
 }
