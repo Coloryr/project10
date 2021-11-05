@@ -1,7 +1,11 @@
 package com.coloryr.phoneapp;
 
 import android.bluetooth.*;
+import android.util.Log;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +23,12 @@ public class BluetoothThread {
     private boolean isOk;
     private MyLock lock = new MyLock();
 
+    private boolean haveData;
+    private int size;
+    private final List<byte[]> tempdata = new ArrayList<>();
+
+    public byte[] data;
+
     private final BluetoothGattCallback mCallBack = new BluetoothGattCallback() {
 
         @Override
@@ -30,6 +40,8 @@ public class BluetoothThread {
                 } else {
                     isOk = false;
                 }
+            } else {
+                MainActivity.disconnect();
             }
         }
 
@@ -57,9 +69,7 @@ public class BluetoothThread {
                             }
                         }
                         isOk = true;
-                    }
-                    else
-                    {
+                    } else {
                         MainActivity.disconnect();
                         MainActivity.info("连接失败", "不匹配的蓝牙设备");
                     }
@@ -97,13 +107,42 @@ public class BluetoothThread {
         }
     }
 
-    private void read(byte[] data)
-    {
-
+    private void read(byte[] data) {
+        String temp = new String(data);
+        if (temp.startsWith("points:")) {
+            temp = temp.substring(7);
+            size = Integer.parseInt(temp);
+            Log.i("Test", "points:" + size) ;
+        } else if (size > 0) {
+            tempdata.add(data);
+            size -= data.length;
+        }
+        if (size == 0) {
+            int all = 0;
+            for (byte[] item : tempdata) {
+                all += item.length;
+            }
+            this.data = new byte[all];
+            all = 0;
+            for (byte[] item : tempdata) {
+                System.arraycopy(item, 0, this.data, all, item.length);
+                all += item.length;
+            }
+            tempdata.clear();
+            haveData = true;
+        }
     }
 
     public void close() {
         if (mGatt != null)
             mGatt.close();
+    }
+
+    public byte[] get() {
+        if (haveData) {
+            haveData = false;
+            return data;
+        } else
+            return null;
     }
 }

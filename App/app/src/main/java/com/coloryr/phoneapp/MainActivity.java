@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public static BluetoothUtils bluetooth;
     @SuppressLint("StaticFieldLeak")
-    public static BluetoothThread socket;
+    public static BluetoothThread device;
 
     private AppBarConfiguration appBarConfiguration;
     public NavController nav;
@@ -100,11 +100,11 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("ResourceType")
     public static void select(BluetoothDevice device) {
         android.app.AlertDialog alertDialog = ProgressDialog.show(MainActivity.activity, "", "正在连接");
-        if (socket != null)
-            socket.close();
-        socket = new BluetoothThread(device);
+        if (MainActivity.device != null)
+            MainActivity.device.close();
+        MainActivity.device = new BluetoothThread(device);
         Tasks.run(() -> {
-            boolean res = socket.init();
+            boolean res = MainActivity.device.init();
             MainActivity.run(() -> {
                 alertDialog.dismiss();
                 if (res)

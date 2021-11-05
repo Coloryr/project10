@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "BLE.h"
+#include "FFT.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -91,16 +92,56 @@ void setupBLE()
 
 void loopBLE()
 {
-    if (deviceConnected)
+    if (deviceConnected && digitalRead(GPIO_NUM_0) == LOW)
     {
-        memset(BLEbuf, 0, 32);
-        memcpy(BLEbuf, (char *)"Hello BLE APP!", 32);
-        txC->setValue(BLEbuf);
-
+        ffttest();
+        uint32_t time = millis();
+        Serial.printf("points: %d\n", points);
+        txC->setValue("points:1600");
         txC->notify(); // Send the value to the app!
-        Serial.print("*** Sent Value: ");
-        Serial.print(BLEbuf);
-        Serial.println(" ***");
+
+        uint8_t *data2 = new uint8_t[1600];
+
+        if (points > 300)
+        {
+            uint16_t g = (points / 1600) + 1;
+            for (uint16_t i = 0; i < 1600; i++)
+            {
+                data2[i] = data[i * g];
+            }
+        }
+        else
+        {
+            for (uint16_t i = 0; i < 1600; i++)
+            {
+                data2[i] = data[i];
+            }
+        }
+
+        uint16_t all = 1600;
+
+        for (uint16_t now = 0; now < all;)
+        {
+            if ((all - now) > 20)
+            {
+                txC->setValue((uint8_t *)data2 + now, 20);
+                txC->notify(); // Send the value to the app!
+                delay(50);
+                now += 20;
+            }
+            else
+            {
+                txC->setValue((uint8_t *)data2 + now, all - now);
+                txC->notify(); // Send the value to the app!
+                break;
+            }
+        }
+
+        delete data2;
+
+        Serial.print(millis() - time);
+        Serial.println(" ms");
+        Serial.print("Send data\n");
     }
-    delay(1000);
+    delay(100);
 }
