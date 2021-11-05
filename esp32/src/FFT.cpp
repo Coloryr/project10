@@ -1,34 +1,3 @@
-/*
-
-	Example of use of the FFT libray
-        Copyright (C) 2014 Enrique Condes
-
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
-/*
-  In this example, the Arduino simulates the sampling of a sinusoidal 1000 Hz
-  signal with an amplitude of 100, sampled at 5000 Hz. Samples are stored
-  inside the vReal array. The samples are windowed according to Hamming
-  function. The FFT is computed using the windowed samples. Then the magnitudes
-  of each of the frequencies that compose the signal are calculated. Finally,
-  the frequency with the highest peak is obtained, being that the main frequency
-  present in the signal. This frequency is printed, along with the magnitude of
-  the peak.
-*/
-
 #include "arduinoFFT.h"
 #include "FFT.h"
 
@@ -45,16 +14,28 @@ Input vectors receive computed results from FFT
 float *vReal;
 float *vImag;
 
+const char cData[] = {0x63, 0x6C, 0x65, 0x20, 0x31, 0x2C, 0x30, 0xff, 0xff, 0xff};
+const char nData[15] = {0x61, 0x64, 0x64, 0x74, 0x20, 0x31, 0x2C, 0x30, 0x2C, 0x32, 0x34, 0x30, 0xff, 0xff, 0xff};
+
 #define SCL_INDEX 0x00
 #define SCL_TIME 0x01
 #define SCL_FREQUENCY 0x02
 #define SCL_PLOT 0x03
 
+float baseFrequency;
+float range[5];
+float magin[4];
+
 void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
 {
+    bool find = false;
+    float k = 50;
+    uint8_t step = 0;
+    range[1] = range[2] = range[3] = range[4] = 0;
+    magin[0] = magin[1] = magin[2] = magin[3] = 0;
     for (uint16_t i = 0; i < bufferSize; i++)
     {
-        float abscissa;
+        float abscissa = 0;
         /* Print abscissa value */
         switch (scaleType)
         {
@@ -68,7 +49,31 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             abscissa = ((i * 1.0 * samplingFrequency) / samples);
             break;
         }
-        if (abscissa > 90000 && abscissa < 110000)
+        if (!find)
+        {
+            if (abscissa > baseFrequency)
+            {
+                find = true;
+            }
+        }
+        else if (step < 5)
+        {
+            double temp = abs(abscissa - (baseFrequency * (2 + step)));
+            if (temp < k)
+            {
+                if (magin[step] >= temp)
+                {
+                    range[1 + step] = vData[i];
+                }
+                magin[step] = temp;
+            }
+            else if (range[1 + step] != 0)
+            {
+                step++;
+            }
+        }
+
+        if (abscissa > 700 && abscissa < 1300)
         {
             Serial.print(abscissa, 6);
             if (scaleType == SCL_FREQUENCY)
@@ -76,7 +81,7 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             Serial.print(" ");
             Serial.println(vData[i], 4);
         }
-        else if (abscissa > 190000 && abscissa < 210000)
+        else if (abscissa > 1700 && abscissa < 2300)
         {
             Serial.print(abscissa, 6);
             if (scaleType == SCL_FREQUENCY)
@@ -84,7 +89,7 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             Serial.print(" ");
             Serial.println(vData[i], 4);
         }
-        else if (abscissa > 290000 && abscissa < 310000)
+        else if (abscissa > 2700 && abscissa < 3300)
         {
             Serial.print(abscissa, 6);
             if (scaleType == SCL_FREQUENCY)
@@ -92,7 +97,7 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             Serial.print(" ");
             Serial.println(vData[i], 4);
         }
-        else if (abscissa > 390000 && abscissa < 410000)
+        else if (abscissa > 3700 && abscissa < 4300)
         {
             Serial.print(abscissa, 6);
             if (scaleType == SCL_FREQUENCY)
@@ -100,7 +105,7 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             Serial.print(" ");
             Serial.println(vData[i], 4);
         }
-        else if (abscissa > 490000 && abscissa < 510000)
+        else if (abscissa > 4900 && abscissa < 5100)
         {
             Serial.print(abscissa, 6);
             if (scaleType == SCL_FREQUENCY)
@@ -112,6 +117,16 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
     Serial.println();
 }
 
+void showpoint()
+{
+    uint16_t f = samplingFrequency / baseFrequency;
+    uint16_t g = (f / 240) + 1;
+    for (uint16_t i = 0; i < 240; i++)
+    {
+        Serial2.write(data[i * g] + 100);
+    }
+}
+
 void ffttest()
 {
     vReal = new float[samples];
@@ -120,22 +135,41 @@ void ffttest()
     /* Build raw data */
     for (uint16_t i = 0; i < samples; i++)
     {
-        vReal[i] = data[i]; /* Build data with positive and negative values*/
-        vImag[i] = 0.0;     //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+        vReal[i] = (float)data[i] / (255 / 10); /* Build data with positive and negative values*/
+        vImag[i] = 0.0;                         //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
     FFT.DCRemoval(vReal, samples);
     FFT.Windowing(vReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD); /* Weigh data */
     FFT.Compute(vReal, vImag, samples, FFT_FORWARD);                 /* Compute FFT */
     FFT.ComplexToMagnitude(vReal, vImag, samples);                   /* Compute magnitudes */
 
+    float x, y;
+    FFT.MajorPeak(vReal, samples, samplingFrequency, &x, &y);
+
+    Serial.printf("x: %f y: %f\n", x, y);
+
+    baseFrequency = x;
+    range[0] = y;
+
     for (uint16_t i = 0; i < samples; i++)
     {
         vReal[i] = vReal[i] / (samples / 2);
     }
 
+    PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
+    Serial.printf("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f\n",
+                  baseFrequency, range[0], range[1], range[2], range[3], range[4]);
+
+    Serial2.write(cData, 10);
+    delay(50);
+
+    Serial2.write(nData, 15);
+    delay(200);
+    showpoint();
+
     Serial.print(millis() - time);
     Serial.println(" ms");
-    PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
+
     while (1)
         ; /* Run Once */
           // delay(2000); /* Repeat after delay */

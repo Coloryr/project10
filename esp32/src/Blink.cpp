@@ -6,6 +6,7 @@
 void setup()
 {
     Serial.begin(115200);
+    Serial2.begin(115200);
     // setupBLE();
 }
 
