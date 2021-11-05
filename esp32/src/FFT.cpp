@@ -1,5 +1,6 @@
 #include "arduinoFFT.h"
 #include "FFT.h"
+#include "math.h"
 
 arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
 /*
@@ -15,7 +16,8 @@ float vReal[samples];
 float *vImag;
 
 const char cData[] = {0x63, 0x6C, 0x65, 0x20, 0x31, 0x2C, 0x30, 0xff, 0xff, 0xff};
-const char nData[15] = {0x61, 0x64, 0x64, 0x74, 0x20, 0x31, 0x2C, 0x30, 0x2C, 0x32, 0x34, 0x30, 0xff, 0xff, 0xff};
+const char nData[] = {0x61, 0x64, 0x64, 0x74, 0x20, 0x31, 0x2C, 0x30, 0x2C, 0x32, 0x34, 0x30, 0xff, 0xff, 0xff};
+const char eData[] = {0xff, 0xff, 0xff};
 
 #define SCL_INDEX 0x00
 #define SCL_TIME 0x01
@@ -24,34 +26,9 @@ const char nData[15] = {0x61, 0x64, 0x64, 0x74, 0x20, 0x31, 0x2C, 0x30, 0x2C, 0x
 
 float baseFrequency[5];
 float range[5];
+float THD;
 
 uint16_t points;
-
-// double tau(double x)
-// {
-//     double p1 = log(3 * pow(x, 2.0) + 6 * x + 1);
-//     double part1 = x + 1 - sqrt(2.0 / 3.0);
-//     double part2 = x + 1 + sqrt(2.0 / 3.0);
-//     double p2 = log(part1 / part2);
-//     return (1.0 / 4.0 * p1 - sqrt(6) / 24 * p2);
-// }
-
-// double peakFreq(uint16_t peakPosIndex, float *vReal, float *vImag, double sampleRate, uint16_t N)
-// {
-//     uint16_t k = peakPosIndex;
-//     double divider = pow(vReal[k], 2.0) + pow(vImag[k], 2.0);
-//     double ap = (vReal[k + 1] * vReal[k] + vImag[k + 1] * vImag[k]) / divider;
-//     double dp = -ap / (1.0 - ap);
-//     double am = (vReal[k - 1] * vReal[k] + vImag[k - 1] * vImag[k]) / divider;
-
-//     double dm = am / (1.0 - am);
-//     double d = (dp + dm) / 2 + tau(dp * dp) - tau(dm * dm);
-
-//     double adjustedBinLocation = (double)k + d;
-//     double peakFreqAdjusted = (sampleRate * adjustedBinLocation / (double)N);
-
-//     return peakFreqAdjusted;
-// }
 
 int round_double(double number)
 {
@@ -61,11 +38,6 @@ int round_double(double number)
 uint16_t getPos(double f)
 {
     return round_double(((double)samples * f) / samplingFrequency);
-}
-
-float getH(uint16_t index, float *vData)
-{
-    return fabs(vData[index - 1] - (2.0 * vData[index]) + vData[index + 1]);
 }
 
 void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
@@ -87,7 +59,11 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             break;
         }
 
-        if ((abscissa > 700 && abscissa < 1300) || (abscissa > 1700 && abscissa < 2300) || (abscissa > 2700 && abscissa < 3300) || (abscissa > 3700 && abscissa < 4300) || (abscissa > 4700 && abscissa < 5300))
+        if ((abscissa > (baseFrequency[0] - 300) && abscissa < (baseFrequency[0] + 300)) ||
+            (abscissa > (baseFrequency[1] - 300) && abscissa < (baseFrequency[1] + 300)) ||
+            (abscissa > (baseFrequency[2] - 300) && abscissa < (baseFrequency[2] + 300)) ||
+            (abscissa > (baseFrequency[3] - 300) && abscissa < (baseFrequency[3] + 300)) ||
+            (abscissa > (baseFrequency[4] - 300) && abscissa < (baseFrequency[4] + 300)))
         {
             Serial.printf("index: %d ", i);
             Serial.print(abscissa, 6);
@@ -108,16 +84,116 @@ void showpoint()
         uint16_t g = (points / 240) + 1;
         for (uint16_t i = 0; i < 240; i++)
         {
-            Serial2.write(data[i * g] + 100);
+            Serial2.write(uint16_t(data[i * g] * 0.1) + 100);
         }
     }
     else
     {
         for (uint16_t i = 0; i < 240; i++)
         {
-            Serial2.write(data[i] + 100);
+            Serial2.write(uint16_t(data[i] * 0.1) + 100);
         }
     }
+}
+
+// #define pi 3.141593
+// #define f 1000 //原正弦波频率
+
+float findmax(float *data)
+{
+    float maxY = 0;
+    for (uint16_t i = 1; i < ((20 >> 1) + 1); i++)
+    {
+        if ((data[i - 1] < data[i]) && (data[i] > data[i + 1]))
+        {
+            if (data[i] > maxY)
+            {
+                maxY = data[i];
+            }
+        }
+    }
+    return maxY;
+}
+
+// float addpoint(float *data, uint16_t start)
+// {
+//     float x[20];
+//     double num = 5;
+//     double y = 0, num2 = 4;
+//     uint16_t n = 0;
+//     num2++;
+//     Serial.printf("fix index: %d\n", start);
+//     start -= 2;
+//     Serial.printf("fix data: %f %f %f %f %f\n", data[start], data[start + 1], data[start + 2], data[start + 3], data[start + 4]);
+//     for (uint16_t u = 0; u <= num; u++, start++)
+//     {
+//         if (u != num)
+//         {
+//             x[n] = data[start];
+//             n++;
+//             for (int k = 1; k < num2; k++)
+//             {
+//                 double t = u * 1 / (num * f) + k / (num2 * f * num);
+//                 for (int m = 0; m <= num; m++)
+//                 {
+//                     y += data[m] * sin(pi * (t * num * f - m)) / (pi * (t * num * f - m));
+//                 }
+//                 x[n] = y;
+//                 n++;
+//                 y = 0;
+//             }
+//         }
+//     }
+//     return findmax(x);
+// }
+
+#define REF_LEN 5 //参考数据长度
+#define INTER 4   //插值比例
+float sinx[INTER * REF_LEN][REF_LEN];
+void sinx_init()
+{
+    for (int t = 0; t < INTER * REF_LEN; t++)
+    {
+        for (int m = 0; m < REF_LEN; m++)
+        {
+            int temp = t - m * INTER;
+            if (temp == 0)
+            {
+                sinx[t][m] = 1;
+            }
+            else
+            {
+                float x = PI * ((float)temp) / INTER;
+                sinx[t][m] = sin(x) / x;
+            }
+        }
+    }
+}
+void sinx_do(float ref[], float result[])
+{
+    int off = 0;
+    for (int t = 0; t < INTER * REF_LEN; t++)
+    {
+        float sum = 0;
+        for (int m = 0; m < REF_LEN; m++)
+            sum += ref[m] * sinx[t][m];
+        result[off] = (sum);
+        off++;
+    }
+}
+
+float addpoint(float *data, uint16_t start)
+{
+    sinx_init();
+    float buf[REF_LEN];
+    float buf_inter[REF_LEN * INTER];
+    start -= 2;
+    for (uint16_t a = 0; a < 5; a++, start++)
+    {
+        buf[a] = data[start];
+    }
+    sinx_do(buf, buf_inter);
+    return findmax(buf_inter);
 }
 
 void ffttest()
@@ -127,31 +203,23 @@ void ffttest()
     /* Build raw data */
     for (uint16_t i = 0; i < samples; i++)
     {
-        vReal[i] = (float)data[i] / (255 / 10); /* Build data with positive and negative values*/
-        vImag[i] = 0.0;                         //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+        vReal[i] = (float)data[i] / (4096 / 10); /* Build data with positive and negative values*/
+        vImag[i] = 0.0;                          //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
     FFT.DCRemoval(vReal, samples);
     FFT.Windowing(vReal, samples, FFT_WIN_TYP_HANN, FFT_FORWARD); /* Weigh data */
     FFT.Compute(vReal, vImag, samples, FFT_FORWARD);              /* Compute FFT */
-    FFT.ComplexToMagnitude(vReal, vImag, samples); /* Compute magnitudes */
+    FFT.ComplexToMagnitude(vReal, vImag, samples);                /* Compute magnitudes */
 
-    float x, y;
-    FFT.MajorPeak(vReal, samples, samplingFrequency, &x, &y);
-
-    y = y / (samples / 2);
-
-    Serial.printf("x: %f y: %f\n", x, y);
+    float x = FFT.MajorPeak(vReal, samples, samplingFrequency);
 
     baseFrequency[0] = x + 6;
-    range[0] = y;
 
-    for (int16_t i = 1; i < 5; i++)
+    for (int16_t i = 0; i < 5; i++)
     {
         baseFrequency[i] = (baseFrequency[0]) * (i + 1);
         uint16_t index = getPos(baseFrequency[i]);
-        Serial.printf("index: %d\n", index);
-        // range[i] = getH(index, vReal);
-        range[i] = vReal[index];
+        range[i] = addpoint(vReal, index);
         range[i] = range[i] / (samples / 2);
     }
 
@@ -161,8 +229,9 @@ void ffttest()
     }
 
     PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
-    Serial.printf("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f\n",
-                  baseFrequency[0], range[0], range[1], range[2], range[3], range[4]);
+
+    THD = sqrt(sq(range[1]) + sq(range[2]) + sq(range[3]) + sq(range[4])) / range[0];
+    THD = THD * 100;
 
     Serial2.write(cData, 10);
     delay(50);
@@ -170,9 +239,31 @@ void ffttest()
     Serial2.write(nData, 15);
     delay(200);
     showpoint();
+    delay(50);
+
+    Serial2.printf("t1.txt=\"%.2f%c\"", THD, '%');
+    Serial2.write(eData, 3);
+
+    Serial2.printf("t3.txt=\"%.5f\"", range[0]);
+    Serial2.write(eData, 3);
+
+    Serial2.printf("t4.txt=\"%.5f\"", range[1]);
+    Serial2.write(eData, 3);
+
+    Serial2.printf("t5.txt=\"%.5f\"", range[2]);
+    Serial2.write(eData, 3);
+
+    Serial2.printf("t6.txt=\"%.5f\"", range[3]);
+    Serial2.write(eData, 3);
+
+    Serial2.printf("t7.txt=\"%.5f\"", range[4]);
+    Serial2.write(eData, 3);
 
     Serial.print(millis() - time);
     Serial.println(" ms");
+
+    Serial.printf("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\n",
+                  baseFrequency[0], range[0], range[1], range[2], range[3], range[4], THD, '%');
 
     delete vImag;
 }

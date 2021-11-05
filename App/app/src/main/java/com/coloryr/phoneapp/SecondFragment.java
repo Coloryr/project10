@@ -1,5 +1,6 @@
 package com.coloryr.phoneapp;
 
+import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -8,6 +9,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.ListView;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -19,6 +21,13 @@ public class SecondFragment extends Fragment {
     private Paint mPaint;
     private Path mPath;
 
+    private TextView thd;
+    private TextView t1;
+    private TextView t2;
+    private TextView t3;
+    private TextView t4;
+    private TextView t5;
+
     private boolean init;
     private Thread thread = new Thread(this::run);
     private boolean isRun;
@@ -27,6 +36,12 @@ public class SecondFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_second, container, false);
         view = root.findViewById(R.id.surfaceView);
+        thd = root.findViewById(R.id.text_thd);
+        t1 = root.findViewById(R.id.text_1);
+        t2 = root.findViewById(R.id.text_2);
+        t3 = root.findViewById(R.id.text_3);
+        t4 = root.findViewById(R.id.text_4);
+        t5 = root.findViewById(R.id.text_5);
         mHolder = view.getHolder();
         mHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -68,6 +83,7 @@ public class SecondFragment extends Fragment {
         mHolder.unlockCanvasAndPost(mCanvas);
     }
 
+    @SuppressLint("SetTextI18n")
     private void run() {
         while (isRun) {
             try {
@@ -78,6 +94,15 @@ public class SecondFragment extends Fragment {
                     byte[] data = MainActivity.device.get();
                     if (data != null) {
                         start(data);
+                        float[] temp = MainActivity.device.getData1();
+                        MainActivity.run(() -> {
+                            thd.setText(MainActivity.device.getData2() + "%");
+                            t1.setText("" + temp[0]);
+                            t2.setText("" + temp[1]);
+                            t3.setText("" + temp[2]);
+                            t4.setText("" + temp[3]);
+                            t5.setText("" + temp[4]);
+                        });
                     }
                 }
             } catch (Exception e) {

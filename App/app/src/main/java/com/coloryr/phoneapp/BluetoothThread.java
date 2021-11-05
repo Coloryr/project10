@@ -28,6 +28,8 @@ public class BluetoothThread {
     private final List<byte[]> tempdata = new ArrayList<>();
 
     public byte[] data;
+    public float[] data1 = new float[5];
+    public float data2;
 
     private final BluetoothGattCallback mCallBack = new BluetoothGattCallback() {
 
@@ -107,35 +109,59 @@ public class BluetoothThread {
         }
     }
 
+    private boolean nowRead;
+
     private void read(byte[] data) {
+        if (nowRead) {
+            if (size > 0) {
+                tempdata.add(data);
+                size -= data.length;
+            }
+            if (size == 0) {
+                int all = 0;
+                for (byte[] item : tempdata) {
+                    all += item.length;
+                }
+                this.data = new byte[all];
+                all = 0;
+                for (byte[] item : tempdata) {
+                    System.arraycopy(item, 0, this.data, all, item.length);
+                    all += item.length;
+                }
+                tempdata.clear();
+                nowRead = false;
+                haveData = true;
+            }
+            return;
+        }
         String temp = new String(data);
         if (temp.startsWith("points:")) {
             temp = temp.substring(7);
             size = Integer.parseInt(temp);
-            Log.i("Test", "points:" + size) ;
-        } else if (size > 0) {
-            tempdata.add(data);
-            size -= data.length;
-        }
-        if (size == 0) {
-            int all = 0;
-            for (byte[] item : tempdata) {
-                all += item.length;
-            }
-            this.data = new byte[all];
-            all = 0;
-            for (byte[] item : tempdata) {
-                System.arraycopy(item, 0, this.data, all, item.length);
-                all += item.length;
-            }
-            tempdata.clear();
-            haveData = true;
+            Log.i("Test", "points:" + size);
+            nowRead = true;
+        } else if (temp.startsWith("range")) {
+            temp = temp.substring(5);
+            int temp2 = Integer.parseInt(temp.substring(0, 1));
+            temp = temp.substring(2);
+            this.data1[temp2] = Float.parseFloat(temp);
+        } else if (temp.startsWith("thd:")) {
+            temp = temp.substring(4);
+            this.data2 = Float.parseFloat(temp);
         }
     }
 
     public void close() {
         if (mGatt != null)
             mGatt.close();
+    }
+
+    public float[] getData1() {
+        return data1;
+    }
+
+    public float getData2() {
+        return data2;
     }
 
     public byte[] get() {

@@ -96,9 +96,34 @@ void loopBLE()
     {
         ffttest();
         uint32_t time = millis();
+        String temp1 = "thd:" + String(THD, 6);
+        txC->setValue(temp1.c_str());
+        txC->notify();
+        delay(10);
+        temp1 = "range0:" + String(range[0], 6);
+        txC->setValue(temp1.c_str());
+        txC->notify();
+        delay(10);
+        temp1 = "range1:" + String(range[1], 6);
+        txC->setValue(temp1.c_str());
+        txC->notify();
+        delay(10);
+        temp1 = "range2:" + String(range[2], 6);
+        txC->setValue(temp1.c_str());
+        txC->notify();
+        delay(10);
+        temp1 = "range3:" + String(range[3], 6);
+        txC->setValue(temp1.c_str());
+        txC->notify();
+        delay(10);
+        temp1 = "range4:" + String(range[4], 6);
+        txC->setValue(temp1.c_str());
+        txC->notify();
+        delay(10);
+
         Serial.printf("points: %d\n", points);
         txC->setValue("points:1600");
-        txC->notify(); // Send the value to the app!
+        txC->notify();
 
         uint8_t *data2 = new uint8_t[1600];
 
@@ -107,14 +132,14 @@ void loopBLE()
             uint16_t g = (points / 1600) + 1;
             for (uint16_t i = 0; i < 1600; i++)
             {
-                data2[i] = data[i * g];
+                data2[i] = uint8_t((data[i * g] + 500) * 0.1);
             }
         }
         else
         {
             for (uint16_t i = 0; i < 1600; i++)
             {
-                data2[i] = data[i];
+                data2[i] = uint8_t((data[i] + 500) * 0.1);
             }
         }
 
@@ -125,14 +150,14 @@ void loopBLE()
             if ((all - now) > 20)
             {
                 txC->setValue((uint8_t *)data2 + now, 20);
-                txC->notify(); // Send the value to the app!
+                txC->notify();
                 delay(50);
                 now += 20;
             }
             else
             {
                 txC->setValue((uint8_t *)data2 + now, all - now);
-                txC->notify(); // Send the value to the app!
+                txC->notify();
                 break;
             }
         }
