@@ -68,7 +68,17 @@ uint32_t g_ui32SysClock;
 UART_Handle uart;
 UART_Params uartParams;
 
-void senddata1(char* data, uint32_t size)
+void senddata(const char *data, uint32_t size)
+{
+    UART_write(uart, data, size);
+}
+
+void senddata(uint8_t *data, uint32_t size)
+{
+    UART_write(uart, data, size);
+}
+
+void senddata(char* data, uint32_t size)
 {
     UART_write(uart, data, size);
 }
@@ -91,6 +101,21 @@ void putdata(char *data)
     putdata((uint8_t *)data, strlen(data));
 }
 
+void putdata(char* data, uint32_t size)
+{
+    while(size--)
+    {
+        MAP_UARTCharPut(UART7_BASE, *data++);
+    }
+}
+
+void putdata(const char* data, uint32_t size)
+{
+    while(size--)
+    {
+        MAP_UARTCharPut(UART7_BASE, *data++);
+    }
+}
 
 void error()
 {
@@ -254,7 +279,7 @@ union testT
 union testF
 {
     float f;
-    uint8_t u8[2];
+    uint8_t u8[4];
 };
 
 void sendonce()
@@ -272,16 +297,16 @@ void sendonce()
 
     testF test1;
     test1.f = THD;
-    putdata(test1.u8, 2);
+    putdata(test1.u8, 4);
 
     for(uint16_t i =0;i<5;i++)
     {
         test1.f = range[i];
-        putdata(test1.u8, 2);
+        putdata(test1.u8, 4);
     }
 
     test1.f = baseFrequency[0];
-    putdata(test1.u8, 2);
+    putdata(test1.u8, 4);
 
     printf1("%d", millis() - time);
     printf1(" ms\r");
@@ -289,6 +314,7 @@ void sendonce()
 
 void *mainThread(void *arg0)
 {
+    putdata("                                                     ");
     printf1("fft start\r");
     ffttest();
     for(;;){

@@ -27,7 +27,7 @@ const char *command5 = "range2:";
 const char *command6 = "range3:";
 const char *command7 = "range4:";
 
-bool start = false;
+bool BLEsend = false;
 
 void go();
 
@@ -60,7 +60,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
             if (temp.equals("start"))
             {
                 Serial.println("go!");
-                start = true;
+                BLEsend = true;
             }
         }
     }
@@ -96,7 +96,6 @@ void setupBLE()
 
 void go()
 {
-    uint32_t time = millis();
     String temp1 = command2 + String(THD, 6);
     txC->setValue(temp1.c_str());
     txC->notify();
@@ -128,21 +127,28 @@ void go()
 
     if (points > 100)
     {
-        uint16_t g = (points / 240) + 1;
-        for (uint16_t i = 0; i < 240; i++)
+        uint16_t g = (points / 500) + 1;
+        for (uint16_t i = 0; i < 500; i++)
         {
             data2[i] = uint8_t((data[i * g] + 500) * 0.1);
         }
-        all = 240;
+        all = 500;
     }
     else
     {
-        for (uint16_t i = 0; i < points * 2; i++)
+        float vReal[1000];
+        double fix = 240 / (points + 20);
+        for (uint16_t i = 0; i < points + 20; i++)
         {
-            data2[i] = uint8_t((data[i] + 500) * 0.1);
+            vReal[i] = (float)data[i] / (4096 / 10);
+        }
+        addpoint1(vReal, res, points + 20, 1000, fix);
+        for (uint16_t i = 0; i < 240; i++)
+        {
+            data2[i] = uint8_t(res[i] * 0.1 * (127 / 10) + 100);
         }
 
-        all = points * 2;
+        all = 240;
     }
 
     char buf[10];
@@ -176,22 +182,18 @@ void go()
             break;
         }
     }
-
-    Serial.print(millis() - time);
-    Serial.println(" ms");
-    Serial.print("Send data\n");
 }
 
 void loopBLE()
 {
-    if (deviceConnected && digitalRead(GPIO_NUM_0) == LOW)
-    {
-        start = true;
-    }
-    if (start)
+    // if (deviceConnected && digitalRead(GPIO_NUM_0) == LOW)
+    // {
+    //     BLEsend = true;
+    // }
+    if (BLEsend)
     {
         go();
-        start = false;
+        BLEsend = false;
     }
     delay(100);
 }

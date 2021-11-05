@@ -141,8 +141,8 @@ void enablePinInterrupt(uint8_t pin);
 void interrupts(void);
 void noInterrupts(void);
 
-void senddata(char* data);
-void senddata1(char* data, uint32_t size);
+void senddata(char* data, uint32_t size);
+void putdata(char* data, uint32_t size);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -150,5 +150,13 @@ void senddata1(char* data, uint32_t size);
 
 #ifdef __cplusplus
 #endif
+
+void senddata(char* data);
+void senddata(uint8_t *data, uint32_t size);
+void senddata(const char *data, uint32_t size);
+
+void putdata(char *data);
+void putdata(uint8_t *data,  uint32_t size);
+void putdata(const char* data, uint32_t size);
 
 #endif

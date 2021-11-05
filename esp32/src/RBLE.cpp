@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "RBLE.h"
+#include "BLE.h"
 
 const uint16_t samples = 8192 * 2; //This value MUST ALWAYS be a power of 2
 const double samplingFrequency = 2000000;
@@ -22,20 +23,20 @@ union RTest
 union FTest
 {
     float f;
-    uint8_t u8[2];
+    uint8_t u8[4];
 };
 
 void rbletask(void *arg)
 {
     Serial.println("start read");
-    uint8_t resdata[8192 + 14];
-    Serial2.setRxBufferSize(8192 + 14);
+    uint8_t resdata[8192 + 28];
+    Serial2.setRxBufferSize(8192 + 28);
     Serial2.setTimeout(100);
     for (;;)
     {
         if (mode)
         {
-            Serial2.readBytes(resdata, 8192 + 14);
+            Serial2.readBytes(resdata, 8192 + 28);
             mode = false;
             Serial.println("read start");
             RTest test;
@@ -52,29 +53,33 @@ void rbletask(void *arg)
             FTest test1;
             test1.u8[0] = resdata[8192];
             test1.u8[1] = resdata[8193];
+            test1.u8[2] = resdata[8194];
+            test1.u8[3] = resdata[8195];
             THD = test1.f;
 
             for (uint16_t i = 0; i < 5; i++)
             {
-                test1.u8[0] = resdata[8194 + (i * 2)];
-                test1.u8[1] = resdata[8194 + (i * 2) + 1];
+                test1.u8[0] = resdata[8196 + (i * 4)];
+                test1.u8[1] = resdata[8196 + (i * 4) + 1];
+                test1.u8[2] = resdata[8196 + (i * 4) + 2];
+                test1.u8[3] = resdata[8196 + (i * 4) + 3];
                 range[i] = test1.f;
             }
-            test1.u8[0] = resdata[8204];
-            test1.u8[1] = resdata[8205];
+            test1.u8[0] = resdata[8216];
+            test1.u8[1] = resdata[8217];
+            test1.u8[2] = resdata[8218];
+            test1.u8[3] = resdata[8219];
             baseFrequency = test1.f;
 
             points = samplingFrequency / baseFrequency;
 
-            for (uint16_t size = 0; size < 8192 + 14; size++)
-            {
-                Serial.printf("%d, ", resdata[size]);
-            }
-
+            Serial.println();
             Serial.println("read done");
 
-            Serial.printf("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\r",
-                          baseFrequency, range[0], range[1], range[2], range[3], range[4], THD, '%');
+            Serial.printf("points: %d base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\r",
+                          points, baseFrequency, range[0], range[1], range[2], range[3], range[4], THD, '%');
+
+            BLEsend = true;
         }
         else
         {

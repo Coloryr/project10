@@ -80,6 +80,7 @@ public class SecondFragment extends Fragment {
         });
         isRun = true;
         thread.start();
+        start();
         return root;
     }
 

@@ -89,7 +89,7 @@ void showpoint()
         uint16_t g = (points / 240) + 1;
         for (uint16_t i = 0; i < 240; i++)
         {
-//            Serial2.write(uint16_t(data[i * g] * 0.1) + 100);
+            printf2("%d", uint16_t(data[i * g] * 0.1) + 100);
         }
     }
     else
@@ -102,7 +102,8 @@ void showpoint()
         addpoint1(vReal, res, points + 20, baseFrequency[0], fix);
         for (uint16_t i = 0; i < 240; i++)
         {
-//            Serial2.write(uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100);
+            uint16_t data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
+            printf2("%d", data1);
         }
     }
 }
@@ -153,35 +154,38 @@ void ffttest()
     THD = sqrt(sq(range[1]) + sq(range[2]) + sq(range[3]) + sq(range[4])) / range[0];
     THD = THD * 100;
 
-//    Serial2.write(cData, 10);
-//    delay(50);
-//
-//    Serial2.write(nData, 15);
-//    delay(200);
-//    showpoint();
-//    delay(50);
-//
-//    Serial2.printf("t1.txt=\"%.2f%c\"", THD, '%');
-//    Serial2.write(eData, 3);
-//
-//    Serial2.printf("t3.txt=\"%.5f\"", range[0]);
-//    Serial2.write(eData, 3);
-//
-//    Serial2.printf("t4.txt=\"%.5f\"", range[1]);
-//    Serial2.write(eData, 3);
-//
-//    Serial2.printf("t5.txt=\"%.5f\"", range[2]);
-//    Serial2.write(eData, 3);
-//
-//    Serial2.printf("t6.txt=\"%.5f\"", range[3]);
-//    Serial2.write(eData, 3);
-//
-//    Serial2.printf("t7.txt=\"%.5f\"", range[4]);
-//    Serial2.write(eData, 3);
+    putdata(cData, 10);
+    delay(50);
+
+    putdata(nData, 15);
+    delay(200);
+    showpoint();
+    delay(50);
+
+    printf1("t1.txt=\"%.2f%c\"", THD, '%');
+    senddata(eData, 3);
+
+    printf1("t1.txt=\"%.2f%c\"", THD, '%');
+    senddata(eData, 3);
+
+    printf2("t3.txt=\"%.5f\"", range[0]);
+    putdata(eData, 3);
+
+    printf2("t4.txt=\"%.5f\"", range[1]);
+    putdata(eData, 3);
+
+    printf2("t5.txt=\"%.5f\"", range[2]);
+    putdata(eData, 3);
+
+    printf2("t6.txt=\"%.5f\"", range[3]);
+    putdata(eData, 3);
+
+    printf2("t7.txt=\"%.5f\"", range[4]);
+    putdata(eData, 3);
 //
     printf1("%d", millis() - time);
     printf1(" ms\r");
 
-    printf1("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\r",
-                  baseFrequency[0], range[0], range[1], range[2], range[3], range[4], THD, '%');
+    printf1("points %d base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\r",
+            points, baseFrequency[0], range[0], range[1], range[2], range[3], range[4], THD, '%');
 }

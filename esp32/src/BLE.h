@@ -5,4 +5,6 @@
 void setupBLE();
 void loopBLE();
 
+extern bool BLEsend;
+
 #endif 
