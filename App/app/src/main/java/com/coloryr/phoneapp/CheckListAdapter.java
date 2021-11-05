@@ -20,9 +20,20 @@ public class CheckListAdapter extends ArrayAdapter<BluetoothDevice> {
     }
 
     private final int resourceId;
+    private final List<BluetoothDevice> objs;
+
+    @Override
+    public void add(BluetoothDevice object) {
+        for (BluetoothDevice item : objs) {
+            if (item.equals(object))
+                return;
+        }
+        super.add(object);
+    }
 
     public CheckListAdapter(Context context, int headImage, List<BluetoothDevice> obj) {
         super(context, headImage, obj);
+        objs = obj;
         resourceId = headImage;
     }
 

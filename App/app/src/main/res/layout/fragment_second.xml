@@ -100,5 +100,15 @@
                       android:textSize="30sp"
                       android:id="@+id/text_5"/>
         </LinearLayout>
+        <Button android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:textSize="20sp"
+                android:id="@+id/text_button"
+                android:text="测量"/>
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_load"
+                android:id="@+id/list_load"/>
     </LinearLayout>
 </LinearLayout>

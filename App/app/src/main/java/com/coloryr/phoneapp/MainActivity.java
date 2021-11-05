@@ -83,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void disconnect() {
+        show("设备断开");
         run(() -> {
+            device.close();
             activity.nav.navigateUp();
         });
     }

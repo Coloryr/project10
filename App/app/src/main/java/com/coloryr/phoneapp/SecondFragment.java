@@ -8,6 +8,11 @@ import android.graphics.Path;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.*;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -28,8 +33,13 @@ public class SecondFragment extends Fragment {
     private TextView t4;
     private TextView t5;
 
+    private Button button;
+
+    private ImageView load;
+    private RotateAnimation rotate;
+
     private boolean init;
-    private Thread thread = new Thread(this::run);
+    private final Thread thread = new Thread(this::run);
     private boolean isRun;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -42,6 +52,14 @@ public class SecondFragment extends Fragment {
         t3 = root.findViewById(R.id.text_3);
         t4 = root.findViewById(R.id.text_4);
         t5 = root.findViewById(R.id.text_5);
+        button = root.findViewById(R.id.text_button);
+        load = root.findViewById(R.id.list_load);
+        button.setOnClickListener(v -> {
+            MainActivity.show("开始测量");
+            start();
+            MainActivity.device.send("start");
+            button.setEnabled(false);
+        });
         mHolder = view.getHolder();
         mHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -63,6 +81,24 @@ public class SecondFragment extends Fragment {
         isRun = true;
         thread.start();
         return root;
+    }
+
+    private void start() {
+        rotate = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        LinearInterpolator lin = new LinearInterpolator();
+        rotate.setInterpolator(lin);
+        rotate.setDuration(1500);//设置动画持续时间
+        rotate.setRepeatCount(-1);//设置重复次数
+        rotate.setFillAfter(true);//动画执行完后是否停留在执行完的状态
+        rotate.setStartOffset(10);//执行前的等待时间
+        load.startAnimation(rotate);
+        load.setVisibility(View.VISIBLE);
+    }
+
+    private void stop() {
+        rotate.cancel();
+        load.clearAnimation();
+        load.setVisibility(View.GONE);
     }
 
     private void clear() {
@@ -102,6 +138,8 @@ public class SecondFragment extends Fragment {
                             t3.setText("" + temp[2]);
                             t4.setText("" + temp[3]);
                             t5.setText("" + temp[4]);
+                            stop();
+                            button.setEnabled(true);
                         });
                     }
                 }
