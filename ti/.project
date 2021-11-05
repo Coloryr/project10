@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>ti</name>
+	<name>uartecho_MSP_EXP432E401Y_tirtos_ccs</name>
 	<comment></comment>
 	<projects>
+		<project>tirtos_builds_MSP_EXP432E401Y_release_ccs</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
