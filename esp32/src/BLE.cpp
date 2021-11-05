@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "BLE.h"
 #include "FFT.h"
+#include "utils.h"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -115,10 +116,12 @@ void go()
     delay(10);
 
     Serial.printf("points: %d\n", points);
-    txC->setValue("points:1600");
-    txC->notify();
 
-    uint8_t *data2 = new uint8_t[1600];
+    float *temp = (float *)malloc(sizeof(float) * (points * 2));
+    float *temp2 = (float *)malloc(sizeof(float) * (points * 8));
+    uint8_t *data2 = (uint8_t *)malloc(sizeof(uint8_t) * (1600));
+
+    uint16_t count = 0;
 
     if (points > 300)
     {
@@ -130,15 +133,28 @@ void go()
     }
     else
     {
-        for (uint16_t i = 0; i < 1600; i++)
+        Serial.println("add points");
+
+        for (uint16_t i = 0; i < points * 2; i += 6)
         {
-            data2[i] = uint8_t((data[i] + 500) * 0.1);
-            data2[i + 1] = data2[i + 2] = data2[i + 3] = data2[i];
-            i += 4;
+            temp[i] = float(data[i] * 0.1);
+        }
+        addpoint1(temp, temp2, points * 2);
+        for (; count < points * 8; count++)
+        {
+            data2[count] = uint8_t((temp2[count] + 500));
         }
     }
 
-    uint16_t all = 1600;
+    uint16_t all = count;
+
+    char *buf = (char *)malloc(sizeof(char) * 10);
+    sprintf(buf, "%d", all);
+
+    Serial.printf("data size: %d\n", all);
+    temp1 = "points:" + String(buf);
+    txC->setValue(temp1.c_str());
+    txC->notify();
 
     for (uint16_t now = 0; now < all;)
     {
@@ -157,7 +173,10 @@ void go()
         }
     }
 
-    delete data2;
+    free(temp);
+    free(temp2);
+    free(buf);
+    free(data2);
 
     Serial.print(millis() - time);
     Serial.println(" ms");

@@ -12,7 +12,7 @@ const double samplingFrequency = 2000000;
 These are the input and output vectors
 Input vectors receive computed results from FFT
 */
-float vReal[samples];
+float *vReal;
 float *vImag;
 
 const char cData[] = {0x63, 0x6C, 0x65, 0x20, 0x31, 0x2C, 0x30, 0xff, 0xff, 0xff};
@@ -96,9 +96,6 @@ void showpoint()
     }
 }
 
-// #define pi 3.141593
-// #define f 1000 //原正弦波频率
-
 float findmax(float *data)
 {
     float maxY = 0;
@@ -114,38 +111,6 @@ float findmax(float *data)
     }
     return maxY;
 }
-
-// float addpoint(float *data, uint16_t start)
-// {
-//     float x[20];
-//     double num = 5;
-//     double y = 0, num2 = 4;
-//     uint16_t n = 0;
-//     num2++;
-//     Serial.printf("fix index: %d\n", start);
-//     start -= 2;
-//     Serial.printf("fix data: %f %f %f %f %f\n", data[start], data[start + 1], data[start + 2], data[start + 3], data[start + 4]);
-//     for (uint16_t u = 0; u <= num; u++, start++)
-//     {
-//         if (u != num)
-//         {
-//             x[n] = data[start];
-//             n++;
-//             for (int k = 1; k < num2; k++)
-//             {
-//                 double t = u * 1 / (num * f) + k / (num2 * f * num);
-//                 for (int m = 0; m <= num; m++)
-//                 {
-//                     y += data[m] * sin(pi * (t * num * f - m)) / (pi * (t * num * f - m));
-//                 }
-//                 x[n] = y;
-//                 n++;
-//                 y = 0;
-//             }
-//         }
-//     }
-//     return findmax(x);
-// }
 
 #define REF_LEN 5 //参考数据长度
 #define INTER 4   //插值比例
@@ -198,7 +163,8 @@ float addpoint(float *data, uint16_t start)
 
 void ffttest()
 {
-    vImag = new float[samples];
+    vReal = (float *)malloc(sizeof(float) * (samples));
+    vImag = (float *)malloc(sizeof(float) * (samples));
     unsigned long time = millis();
     /* Build raw data */
     for (uint16_t i = 0; i < samples; i++)
@@ -265,5 +231,6 @@ void ffttest()
     Serial.printf("base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\n",
                   baseFrequency[0], range[0], range[1], range[2], range[3], range[4], THD, '%');
 
-    delete vImag;
+    free(vReal);
+    free(vImag);
 }
