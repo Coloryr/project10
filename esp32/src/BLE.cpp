@@ -19,6 +19,14 @@ uint32_t cnt = 0;
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
+const char *command1 = "points:";
+const char *command2 = "thd:";
+const char *command3 = "range0:";
+const char *command4 = "range1:";
+const char *command5 = "range2:";
+const char *command6 = "range3:";
+const char *command7 = "range4:";
+
 bool start = false;
 
 void go();
@@ -47,7 +55,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
         if (rxValue.length() > 0)
         {
-            Serial.printf("eceived Value: %s\n", rxValue.c_str());
+            Serial.printf("Received Value: %s\n", rxValue.c_str());
             String temp = String(rxValue.c_str());
             if (temp.equals("start"))
             {
@@ -62,7 +70,7 @@ void setupBLE()
     Serial.begin(115200);
 
     // Create the BLE Device
-    BLEDevice::init("ESP32 BLE Test");
+    BLEDevice::init("A题测试机014");
 
     // Create the BLE Server
     pServer = BLEDevice::createServer();
@@ -90,70 +98,67 @@ void go()
 {
     ffttest();
     uint32_t time = millis();
-    String temp1 = "thd:" + String(THD, 6);
+    String temp1 = command2 + String(THD, 6);
     txC->setValue(temp1.c_str());
     txC->notify();
     delay(10);
-    temp1 = "range0:" + String(range[0], 6);
+    temp1 = command3 + String(range[0], 6);
     txC->setValue(temp1.c_str());
     txC->notify();
     delay(10);
-    temp1 = "range1:" + String(range[1], 6);
+    temp1 = command4 + String(range[1], 6);
     txC->setValue(temp1.c_str());
     txC->notify();
     delay(10);
-    temp1 = "range2:" + String(range[2], 6);
+    temp1 = command5 + String(range[2], 6);
     txC->setValue(temp1.c_str());
     txC->notify();
     delay(10);
-    temp1 = "range3:" + String(range[3], 6);
+    temp1 = command6 + String(range[3], 6);
     txC->setValue(temp1.c_str());
     txC->notify();
     delay(10);
-    temp1 = "range4:" + String(range[4], 6);
+    temp1 = command7 + String(range[4], 6);
     txC->setValue(temp1.c_str());
     txC->notify();
     delay(10);
 
-    Serial.printf("points: %d\n", points);
-
-    float *temp = (float *)malloc(sizeof(float) * (points * 2));
-    float *temp2 = (float *)malloc(sizeof(float) * (points * 8));
     uint8_t *data2 = (uint8_t *)malloc(sizeof(uint8_t) * (1600));
 
-    uint16_t count = 0;
+    uint16_t all;
 
-    if (points > 300)
+    if (points > 100)
     {
-        uint16_t g = (points / 1600) + 1;
-        for (uint16_t i = 0; i < 1600; i++)
+        uint16_t g = (points / 240) + 1;
+        for (uint16_t i = 0; i < 240; i++)
         {
             data2[i] = uint8_t((data[i * g] + 500) * 0.1);
         }
+        all = 240;
     }
     else
     {
-        Serial.println("add points");
+        for (uint16_t i = 0; i < points * 2; i++)
+        {
+            data2[i] = uint8_t((data[i] + 500) * 0.1);
+        }
 
-        for (uint16_t i = 0; i < points * 2; i += 6)
-        {
-            temp[i] = float(data[i] * 0.1);
-        }
-        addpoint1(temp, temp2, points * 2);
-        for (; count < points * 8; count++)
-        {
-            data2[count] = uint8_t((temp2[count] + 500));
-        }
+        all = points * 2;
     }
 
-    uint16_t all = count;
-
     char *buf = (char *)malloc(sizeof(char) * 10);
-    sprintf(buf, "%d", all);
+    uint16_t size = sprintf(buf, "%d", all);
+    char *buf1 = (char *)malloc(sizeof(char) * 7 + size);
+    for (uint16_t i = 0; i < 7; i++)
+    {
+        buf1[i] = command1[i];
+    }
+    for (uint16_t i = 0; i < size; i++)
+    {
+        buf1[i + 7] = buf[i];
+    }
 
-    Serial.printf("data size: %d\n", all);
-    temp1 = "points:" + String(buf);
-    txC->setValue(temp1.c_str());
+    txC->setValue((uint8_t *)buf1, 7 + size);
     txC->notify();
 
     for (uint16_t now = 0; now < all;)
@@ -173,9 +178,8 @@ void go()
         }
     }
 
-    free(temp);
-    free(temp2);
     free(buf);
+    free(buf1);
     free(data2);
 
     Serial.print(millis() - time);
