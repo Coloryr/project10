@@ -59,6 +59,7 @@
 
 extern void *mainThread(void *arg0);
 extern void *init(void *arg0);
+extern void *led(void *arg0);
 
 /* Stack size in bytes */
 #define THREADSTACKSIZE    8192
@@ -267,6 +268,7 @@ void *init(void *arg0)
 
     usart();
     retc = pthread_create(&thread, &attrs, mainThread, NULL);
+    retc = pthread_create(&thread, &attrs, led, NULL);
     pthread_exit(0);
 }
 
@@ -312,24 +314,33 @@ void sendonce()
     printf1(" ms\r");
 }
 
-void *mainThread(void *arg0)
+void *led(void *arg0)
 {
-    putdata("                                                     ");
-    printf1("fft start\r");
-    ffttest();
-    for(;;){
-
-        if(GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_7) == 0)
-        {
-            sendonce();
-        }
-
+    for(;;)
+    {
         /* Turn on user LED */
         GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_ON);
         delay(1000);
         /* Turn on user LED */
         GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
         delay(1000);
+    }
+}
+
+void *mainThread(void *arg0)
+{
+    putdata("                                                     \r");
+    senddata("                                                     \r");
+
+    for(;;){
+
+        if(GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_7) == 0)
+        {
+            ffttest();
+            sendonce();
+        }
+
+        delay(50);
     }
 }
 

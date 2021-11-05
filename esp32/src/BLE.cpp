@@ -145,7 +145,8 @@ void go()
         addpoint1(vReal, res, points + 20, 1000, fix);
         for (uint16_t i = 0; i < 240; i++)
         {
-            data2[i] = uint8_t(res[i] * 0.1 * (127 / 10) + 100);
+            uint16_t data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
+            data2[i] = uint8_t(data1);
         }
 
         all = 240;

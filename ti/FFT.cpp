@@ -103,7 +103,7 @@ void showpoint()
         for (uint16_t i = 0; i < 240; i++)
         {
             uint16_t data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
-            printf2("%d", data1);
+            putdata((uint8_t*)&data1, 1);
         }
     }
 }
@@ -154,35 +154,33 @@ void ffttest()
     THD = sqrt(sq(range[1]) + sq(range[2]) + sq(range[3]) + sq(range[4])) / range[0];
     THD = THD * 100;
 
-    putdata(cData, 10);
-    delay(50);
-
-    putdata(nData, 15);
-    delay(200);
-    showpoint();
-    delay(50);
-
-    printf1("t1.txt=\"%.2f%c\"", THD, '%');
-    senddata(eData, 3);
-
-    printf1("t1.txt=\"%.2f%c\"", THD, '%');
-    senddata(eData, 3);
-
+    putdata(eData, 3);
+    printf2("t1.txt=\"%.2f%c\"", THD, '%');
+    putdata(eData, 3);
+    delay(10);
     printf2("t3.txt=\"%.5f\"", range[0]);
     putdata(eData, 3);
-
+    delay(10);
     printf2("t4.txt=\"%.5f\"", range[1]);
     putdata(eData, 3);
-
+    delay(10);
     printf2("t5.txt=\"%.5f\"", range[2]);
     putdata(eData, 3);
-
+    delay(10);
     printf2("t6.txt=\"%.5f\"", range[3]);
     putdata(eData, 3);
-
+    delay(10);
     printf2("t7.txt=\"%.5f\"", range[4]);
     putdata(eData, 3);
-//
+    delay(10);
+
+    putdata(cData, 10);
+    delay(20);
+
+    putdata(nData, 15);
+    delay(100);
+    showpoint();
+
     printf1("%d", millis() - time);
     printf1(" ms\r");
 
