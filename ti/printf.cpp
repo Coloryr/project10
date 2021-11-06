@@ -16,28 +16,32 @@
 void printf1(char *format, ...)
 {
     char loc_buf[64];
-    char * temp = loc_buf;
+    char *temp = loc_buf;
     va_list arg;
     va_list copy;
     va_start(arg, format);
     va_copy(copy, arg);
     int len = vsnprintf(temp, sizeof(loc_buf), format, copy);
     va_end(copy);
-    if(len < 0) {
+    if (len < 0)
+    {
         va_end(arg);
         return;
     };
-    if(len >= sizeof(loc_buf)){
-        temp = (char*) malloc(len+1);
-        if(temp == NULL) {
+    if (len >= sizeof(loc_buf))
+    {
+        temp = (char *)malloc(len + 1);
+        if (temp == NULL)
+        {
             va_end(arg);
             return;
         }
-        len = vsnprintf(temp, len+1, format, arg);
+        len = vsnprintf(temp, len + 1, format, arg);
     }
     va_end(arg);
     senddata(temp, len);
-    if(temp != loc_buf){
+    if (temp != loc_buf)
+    {
         free(temp);
     }
 }
@@ -45,28 +49,32 @@ void printf1(char *format, ...)
 void printf2(char *format, ...)
 {
     char loc_buf[64];
-    char * temp = loc_buf;
+    char *temp = loc_buf;
     va_list arg;
     va_list copy;
     va_start(arg, format);
     va_copy(copy, arg);
     int len = vsnprintf(temp, sizeof(loc_buf), format, copy);
     va_end(copy);
-    if(len < 0) {
+    if (len < 0)
+    {
         va_end(arg);
         return;
     };
-    if(len >= sizeof(loc_buf)){
-        temp = (char*) malloc(len+1);
-        if(temp == NULL) {
+    if (len >= sizeof(loc_buf))
+    {
+        temp = (char *)malloc(len + 1);
+        if (temp == NULL)
+        {
             va_end(arg);
             return;
         }
-        len = vsnprintf(temp, len+1, format, arg);
+        len = vsnprintf(temp, len + 1, format, arg);
     }
     va_end(arg);
     putdata(temp, len);
-    if(temp != loc_buf){
+    if (temp != loc_buf)
+    {
         free(temp);
     }
 }

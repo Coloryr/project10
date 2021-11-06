@@ -55,30 +55,31 @@
 //#define _POSIX_SOURCE /* prevent conflicting #defines of FD_SET, fd_set, ... from arm compiler's sys/types.h and simplelink.h */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* interrupt edges */
-#define CHANGE          4
-#define FALLING         3
-#define RISING          2
-#define HIGH            1
-#define LOW             0
+#define CHANGE 4
+#define FALLING 3
+#define RISING 2
+#define HIGH 1
+#define LOW 0
 
 /* digital i/o configurations */
-#define INPUT           0x0
-#define OUTPUT          0x1
-#define INPUT_PULLUP    0x2
-#define INPUT_PULLDOWN  0x3
+#define INPUT 0x0
+#define OUTPUT 0x1
+#define INPUT_PULLUP 0x2
+#define INPUT_PULLDOWN 0x3
 
 /* analogReference() stuff */
-#define DEFAULT         1
-#define INTERNAL        2
-#define EXTERNAL        3
+#define DEFAULT 1
+#define INTERNAL 2
+#define EXTERNAL 3
 
-#define INTERNAL1V2     4
-#define INTERNAL1V45    5
-#define INTERNAL2V5     6
+#define INTERNAL1V2 4
+#define INTERNAL1V45 5
+#define INTERNAL2V5 6
 
 /* SPI stuff */
 #define SPI_LAST 0
@@ -92,58 +93,60 @@ extern "C" {
 #define DEG_TO_RAD 0.017453292519943295769236907684886
 #define RAD_TO_DEG 57.295779513082320876798154814105
 
-typedef uint8_t boolean;
-typedef uint8_t byte;
+    typedef uint8_t boolean;
+    typedef uint8_t byte;
 
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
+#define round(x) ((x) >= 0 ? (long)((x) + 0.5) : (long)((x)-0.5))
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
-#define sq(x) ((x)*(x))
+#define sq(x) ((x) * (x))
 
-#define clockCyclesPerMicrosecond() ( getCpuFrequency() / 1000000L )
-#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
-#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
+#define clockCyclesPerMicrosecond() (getCpuFrequency() / 1000000L)
+#define clockCyclesToMicroseconds(a) ((a) / clockCyclesPerMicrosecond())
+#define microsecondsToClockCycles(a) ((a)*clockCyclesPerMicrosecond())
 
-#define lowByte(w) ((uint8_t) ((w) & 0xff))
-#define highByte(w) ((uint8_t) ((w) >> 8))
+#define lowByte(w) ((uint8_t)((w)&0xff))
+#define highByte(w) ((uint8_t)((w) >> 8))
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
 
-typedef unsigned int word;
+    typedef unsigned int word;
 
 #define bit(b) (1UL << (b))
 
-void delay(uint32_t milliseconds);
+    void delay(uint32_t milliseconds);
 
-/* Implemented in wiring.c */
-void delayMicroseconds(unsigned int us);
-unsigned long micros();
-unsigned long millis();
+    /* Implemented in wiring.c */
+    void delayMicroseconds(unsigned int us);
+    unsigned long micros();
+    unsigned long millis();
 
-void setDelayResolution(uint32_t milliseconds);
+    void setDelayResolution(uint32_t milliseconds);
 
 /* our interrupt APIs take pin numbers */
 #define digitalPinToInterrupt(pin) pin
 
-/* implemented in WInterrupts.c */
-void attachInterrupt(uint8_t, void (*)(void), int mode);
-void detachInterrupt(uint8_t);
+    /* implemented in WInterrupts.c */
+    void attachInterrupt(uint8_t, void (*)(void), int mode);
+    void detachInterrupt(uint8_t);
 
-void disablePinInterrupt(uint8_t pin);
-void enablePinInterrupt(uint8_t pin);
+    void disablePinInterrupt(uint8_t pin);
+    void enablePinInterrupt(uint8_t pin);
 
-void interrupts(void);
-void noInterrupts(void);
+    void interrupts(void);
+    void noInterrupts(void);
 
-void senddata(char* data, uint32_t size);
-void putdata(char* data, uint32_t size);
-void toesp(char* data, uint32_t size);
+    void senddata(char *data, uint32_t size);
+    void putdata(char *data, uint32_t size);
+    void toesp(char *data, uint32_t size);
+
+    extern bool go;
 
 #ifdef __cplusplus
 } // extern "C"
@@ -152,16 +155,18 @@ void toesp(char* data, uint32_t size);
 #ifdef __cplusplus
 #endif
 
-void senddata(char* data);
+extern uint32_t g_ui32SysClock;
+
+void senddata(char *data);
 void senddata(uint8_t *data, uint32_t size);
 void senddata(const char *data, uint32_t size);
 
 void putdata(char *data);
-void putdata(uint8_t *data,  uint32_t size);
-void putdata(const char* data, uint32_t size);
+void putdata(uint8_t *data, uint32_t size);
+void putdata(const char *data, uint32_t size);
 
 void toesp(char *data);
-void toesp(uint8_t *data,  uint32_t size);
-void toesp(const char* data, uint32_t size);
+void toesp(uint8_t *data, uint32_t size);
+void toesp(const char *data, uint32_t size);
 
 #endif

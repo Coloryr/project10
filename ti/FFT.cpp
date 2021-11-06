@@ -4,15 +4,6 @@
 #include "utils.h"
 #include "Energia.h"
 
-/*
-These values can be changed in order to evaluate the functions
-*/
-const uint16_t samples = 8192 * 2; //This value MUST ALWAYS be a power of 2
-const double samplingFrequency = 2000000;
-/*
-These are the input and output vectors
-Input vectors receive computed results from FFT
-*/
 float vReal[samples];
 float vImag[samples];
 
@@ -69,7 +60,7 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
             printf1("index: %d ", i);
             printf1("%f", abscissa);
             if (scaleType == SCL_FREQUENCY)
-                printf1(0,"Hz");
+                printf1(0, "Hz");
             printf1(" ");
             printf1("%f", vData[i]);
             printf1("\r");
@@ -89,43 +80,32 @@ void showpoint()
         uint16_t g = (points / 240) + 1;
         for (uint16_t i = 0; i < 240; i++)
         {
-            printf2("%d", uint16_t(data[i * g] * 0.1) + 100);
+            printf2("%d", uint16_t(vReal[i * g] * 60) + 100);
         }
     }
     else
     {
         double fix = 240 / (points + 20);
-        for (uint16_t i = 0; i < points + 20; i++)
-        {
-            vReal[i] = (float)data[i] / (4096 / 10);
-        }
         addpoint1(vReal, res, points + 20, baseFrequency[0], fix);
         for (uint16_t i = 0; i < 240; i++)
         {
             uint16_t data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
-            putdata((uint8_t*)&data1, 1);
+            putdata((uint8_t *)&data1, 1);
         }
     }
 }
 
 void ffttest()
 {
-    printf1("fft init1\r");
-
     arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
     sinx_init();
     unsigned long time = millis();
     /* Build raw data */
 
-    printf1("fft init2\r");
-
     for (uint16_t i = 0; i < samples; i++)
     {
-        vReal[i] = (float)data[i] / (4096 / 10); /* Build data with positive and negative values*/
-        vImag[i] = 0.0;                          //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+        vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
-
-    printf1("fft Compute\r");
 
     FFT.DCRemoval(vReal, samples);
     FFT.Windowing(vReal, samples, FFT_WIN_TYP_HANN, FFT_FORWARD); /* Weigh data */

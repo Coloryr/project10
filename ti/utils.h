@@ -8,4 +8,4 @@ void sinx_init();
 void sinx_do(float ref[], float result[]);
 float addpoint(float *data, uint16_t start);
 
-#endif 
+#endif

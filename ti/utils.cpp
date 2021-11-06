@@ -22,7 +22,7 @@ void addpoint1(float *data, float *res, uint16_t count, float f, uint16_t fix)
 {
     float num = count;
     float y = 0, num2 = fix;
-    uint16_t n = 0, n1 =0; 
+    uint16_t n = 0, n1 = 0;
     num2++;
     for (uint16_t u = 0; u <= num; u++, n1++)
     {
