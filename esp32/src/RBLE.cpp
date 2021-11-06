@@ -10,7 +10,7 @@ float range[5];
 float THD;
 float baseFrequency;
 float res[240];
-uint16_t data[4096];
+int16_t data[4096];
 
 bool mode = false;
 
@@ -76,8 +76,9 @@ void rbletask(void *arg)
             Serial.println();
             Serial.println("read done");
 
-            Serial.printf("points: %d base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c\r",
+            Serial.printf("points: %d base: %f range1: %f range2: %f range3: %f range4: %f range5: %f THD: %f%c",
                           points, baseFrequency, range[0], range[1], range[2], range[3], range[4], THD, '%');
+            Serial.println();
 
             BLEsend = true;
         }

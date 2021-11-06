@@ -59,8 +59,9 @@ class MyCallbacks : public BLECharacteristicCallbacks
             String temp = String(rxValue.c_str());
             if (temp.equals("start"))
             {
-                Serial.println("go!");
-                BLEsend = true;
+                digitalWrite(GPIO_NUM_16, LOW);
+                delay(100);
+                digitalWrite(GPIO_NUM_16, HIGH);
             }
         }
     }
@@ -142,11 +143,11 @@ void go()
         {
             vReal[i] = (float)data[i] / (4096 / 10);
         }
-        addpoint1(vReal, res, points + 20, 1000, fix);
+        addpoint1(vReal, res, points + 20, baseFrequency, fix);
         for (uint16_t i = 0; i < 240; i++)
         {
             uint16_t data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
-            data2[i] = uint8_t(data1);
+            data2[i] = data1;
         }
 
         all = 240;
@@ -187,10 +188,13 @@ void go()
 
 void loopBLE()
 {
-    // if (deviceConnected && digitalRead(GPIO_NUM_0) == LOW)
-    // {
-    //     BLEsend = true;
-    // }
+
+    if (digitalRead(GPIO_NUM_0) == LOW)
+    {
+        digitalWrite(GPIO_NUM_16, LOW);
+        delay(100);
+        digitalWrite(GPIO_NUM_16, HIGH);
+    }
     if (BLEsend)
     {
         go();

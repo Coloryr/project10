@@ -36,6 +36,7 @@
  */
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 /* POSIX Header files */
 #include <pthread.h>
@@ -69,6 +70,8 @@ uint32_t g_ui32SysClock;
 UART_Handle uart;
 UART_Params uartParams;
 
+bool go = false;
+
 void senddata(const char *data, uint32_t size)
 {
     UART_write(uart, data, size);
@@ -93,7 +96,9 @@ void putdata(uint8_t *data,  uint32_t size)
 {
     while(size--)
     {
-        MAP_UARTCharPut(UART7_BASE, *data++);
+        UARTCharPut(UART7_BASE, *data++);
+        while(UARTBusy(UART7_BASE))
+            ;
     }
 }
 
@@ -106,7 +111,9 @@ void putdata(char* data, uint32_t size)
 {
     while(size--)
     {
-        MAP_UARTCharPut(UART7_BASE, *data++);
+        UARTCharPut(UART7_BASE, *data++);
+        while(UARTBusy(UART7_BASE))
+            ;
     }
 }
 
@@ -114,7 +121,44 @@ void putdata(const char* data, uint32_t size)
 {
     while(size--)
     {
-        MAP_UARTCharPut(UART7_BASE, *data++);
+        UARTCharPut(UART7_BASE, *data++);
+        while(UARTBusy(UART7_BASE))
+             ;
+    }
+}
+
+void toesp(uint8_t *data,  uint32_t size)
+{
+    while(size--)
+    {
+        UARTCharPut(UART6_BASE, *data++);
+        while(UARTBusy(UART6_BASE))
+             ;
+    }
+}
+
+void toesp(char *data)
+{
+    toesp((uint8_t *)data, strlen(data));
+}
+
+void toesp(char* data, uint32_t size)
+{
+    while(size--)
+    {
+        UARTCharPut(UART6_BASE, *data++);
+        while(UARTBusy(UART6_BASE))
+            ;
+    }
+}
+
+void toesp(const char* data, uint32_t size)
+{
+    while(size--)
+    {
+        UARTCharPut(UART6_BASE, *data++);
+        while(UARTBusy(UART6_BASE))
+            ;
     }
 }
 
@@ -130,6 +174,8 @@ void error()
         delay(200);
     }
 }
+
+uint8_t pui8ControlTable[1024];
 
 void usart()
 {
@@ -159,45 +205,36 @@ void usart()
     /* Enable the clock to the GPIO Port A and wait for it to be ready */
     MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
     while(!(MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOC)))
-    {
+        ;
 
-    }
-
-    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
+    while(!(MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOP)))
+        ;
 
     GPIOPinConfigure(GPIO_PC4_U7RX);
     GPIOPinConfigure(GPIO_PC5_U7TX);
+
+    GPIOPinConfigure(GPIO_PP0_U6RX);
+    GPIOPinConfigure(GPIO_PP1_U6TX);
+
     MAP_GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+    MAP_GPIOPinTypeUART(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
     MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART7);
     while(!(MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_UART7)))
-    {
-    }
+        ;
+
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART6);
+    while(!(MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_UART6)))
+        ;
 
     MAP_UARTConfigSetExpClk(UART7_BASE, g_ui32SysClock, 115200,
                             (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                              UART_CONFIG_PAR_NONE));
 
-    //MAP_IntEnable(INT_UART7);
-    //MAP_UARTIntEnable(INT_UART7, UART_INT_RX | UART_INT_RT);
-
-}
-
-
-void UART0_IRQHandler(void)
-{
-    uint32_t ui32Status;
-    ui32Status = MAP_UARTIntStatus(UART7_BASE, true);
-
-    MAP_UARTIntClear(UART0_BASE, ui32Status);
-
-    while(MAP_UARTCharsAvail(UART7_BASE))
-    {
-        MAP_UARTCharPutNonBlocking(UART7_BASE,
-                                   MAP_UARTCharGetNonBlocking(UART0_BASE));
-
-
-    }
+    MAP_UARTConfigSetExpClk(UART6_BASE, g_ui32SysClock, 115200,
+                            (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
+                             UART_CONFIG_PAR_NONE));
 }
 
 /*
@@ -215,9 +252,13 @@ int main(void)
     GPIO_setConfig(CONFIG_GPIO_LED_0, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 
     MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
     MAP_GPIOPinTypeGPIOInput(GPIO_PORTM_BASE, GPIO_PIN_7);
+    MAP_GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, GPIO_PIN_2);
     GPIOM->PUR |= GPIO_PIN_7;
+    GPIOD->PUR |= GPIO_PIN_2;
     GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_7, 1);
+    GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_2, 1);
 
     /* Initialize the attributes structure with default values */
     pthread_attr_init(&attrs);
@@ -287,28 +328,28 @@ union testF
 void sendonce()
 {
     unsigned long time = millis();
-    putdata("start:32768");
+    toesp("start:32768");
     delay(200);
 
     testT test;
     for(uint16_t i =0;i<4096;i++)
     {
         test.u16 = data[i];
-        putdata(test.u8, 2);
+        toesp(test.u8, 2);
     }
 
     testF test1;
     test1.f = THD;
-    putdata(test1.u8, 4);
+    toesp(test1.u8, 4);
 
     for(uint16_t i =0;i<5;i++)
     {
         test1.f = range[i];
-        putdata(test1.u8, 4);
+        toesp(test1.u8, 4);
     }
 
     test1.f = baseFrequency[0];
-    putdata(test1.u8, 4);
+    toesp(test1.u8, 4);
 
     printf1("%d", millis() - time);
     printf1(" ms\r");
@@ -329,17 +370,20 @@ void *led(void *arg0)
 
 void *mainThread(void *arg0)
 {
-    putdata("                                                     \r");
-    senddata("                                                     \r");
-
-    for(;;){
-
-        if(GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_7) == 0)
+    go = true;
+    for(;;)
+    {
+        if(GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_7) == 0
+                || GPIOPinRead(GPIO_PORTD_BASE, GPIO_PIN_2) == 0)
+        {
+            go = true;
+        }
+        if(go)
         {
             ffttest();
             sendonce();
+            go = false;
         }
-
         delay(50);
     }
 }

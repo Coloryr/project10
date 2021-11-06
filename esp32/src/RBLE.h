@@ -10,5 +10,5 @@ extern float range[5];
 extern float baseFrequency;
 extern float THD;
 extern float res[240];
-extern uint16_t data[];
+extern int16_t data[];
 #endif

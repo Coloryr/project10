@@ -143,6 +143,7 @@ void noInterrupts(void);
 
 void senddata(char* data, uint32_t size);
 void putdata(char* data, uint32_t size);
+void toesp(char* data, uint32_t size);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -158,5 +159,9 @@ void senddata(const char *data, uint32_t size);
 void putdata(char *data);
 void putdata(uint8_t *data,  uint32_t size);
 void putdata(const char* data, uint32_t size);
+
+void toesp(char *data);
+void toesp(uint8_t *data,  uint32_t size);
+void toesp(const char* data, uint32_t size);
 
 #endif

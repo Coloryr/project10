@@ -54,12 +54,7 @@ public class SecondFragment extends Fragment {
         t5 = root.findViewById(R.id.text_5);
         button = root.findViewById(R.id.text_button);
         load = root.findViewById(R.id.list_load);
-        button.setOnClickListener(v -> {
-            MainActivity.show("开始测量");
-            start();
-            MainActivity.device.send("start");
-            button.setEnabled(false);
-        });
+        button.setOnClickListener(v -> test());
         mHolder = view.getHolder();
         mHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -80,8 +75,15 @@ public class SecondFragment extends Fragment {
         });
         isRun = true;
         thread.start();
-        start();
+        test();
         return root;
+    }
+
+    private void test() {
+        MainActivity.show("开始测量");
+        start();
+        MainActivity.device.send("start");
+        button.setEnabled(false);
     }
 
     private void start() {
@@ -132,6 +134,7 @@ public class SecondFragment extends Fragment {
                     if (data != null) {
                         start(data);
                         float[] temp = MainActivity.device.getData1();
+                        MainActivity.show("新数据");
                         MainActivity.run(() -> {
                             thd.setText(MainActivity.device.getData2() + "%");
                             t1.setText("" + temp[0]);
@@ -169,9 +172,11 @@ public class SecondFragment extends Fragment {
         mPaint.setColor(Color.parseColor("#00FFFF"));
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(2);
-        mPath.moveTo(nowx,data[0] * 3 + 400);
-        for (byte datum : data) {
-            mPath.lineTo(nowx, (datum * 3) + 400);
+        int temp = data[1] & 0xff;
+        mPath.moveTo(nowx, height - (temp * 3 + 200));
+        for (int i = 1; i < data.length; i++) {
+            temp = data[i] & 0xff;
+            mPath.lineTo(nowx, height - (temp * 3 + 200));
             mCanvas.drawPath(mPath, mPaint);
             nowx += ax;
         }
