@@ -35,6 +35,7 @@ class MyServerCallbacks : public BLEServerCallbacks
 {
     void onConnect(BLEServer *pServer)
     {
+        pServer->getAdvertising()->stop();
         Serial.println("deviceConnected");
         deviceConnected = true;
     };
@@ -71,7 +72,7 @@ void setupBLE()
     Serial.begin(115200);
 
     // Create the BLE Device
-    BLEDevice::init("A题测试机014");
+    BLEDevice::init("A题测试机");
 
     // Create the BLE Server
     pServer = BLEDevice::createServer();

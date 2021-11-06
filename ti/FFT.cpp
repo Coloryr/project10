@@ -74,19 +74,23 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
 }
 
 float res[240];
+uint8_t res1[240];
 
 void showpoint()
 {
     uint16_t i = 0;
     uint8_t data1;
     points = samplingFrequency / baseFrequency[0];
-    printf1("points: %d\r", points);
     if (points > 100)
     {
         uint16_t g = (points / 240) + 1;
         for (i = 0; i < 240; i++)
         {
-            data1 = uint16_t(vReal1[i * g] * 0.1 * (4096 / 10)) + 100;
+            res1[i] = uint16_t(vReal1[i * g] * -0.1 * (4096 / 10)) + 100;
+        }
+        for (i = 0; i < 240; i++)
+        {
+            data1 = res1[i];
             putdata(&data1, 1);
         }
     }
@@ -96,7 +100,7 @@ void showpoint()
         addpoint1(vReal1, res, points + 20, baseFrequency[0], fix);
         for (i = 0; i < 240; i++)
         {
-            data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
+            data1 = uint16_t(res[240 - i] * -0.1 * (4096 / 10)) + 100;
             putdata((uint8_t *)&data1, 1);
         }
     }
