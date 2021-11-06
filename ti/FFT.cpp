@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "Energia.h"
 
+arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
+
 float vReal[samples];
 float vImag[samples];
 
@@ -19,6 +21,8 @@ const char eData[] = {0xff, 0xff, 0xff};
 float baseFrequency[5];
 float range[5];
 float THD;
+
+float vReal1[4096];
 
 uint16_t points;
 
@@ -73,23 +77,26 @@ float res[240];
 
 void showpoint()
 {
+    uint16_t i = 0;
+    uint8_t data1;
     points = samplingFrequency / baseFrequency[0];
     printf1("points: %d\r", points);
     if (points > 100)
     {
         uint16_t g = (points / 240) + 1;
-        for (uint16_t i = 0; i < 240; i++)
+        for (i = 0; i < 240; i++)
         {
-            printf2("%d", uint16_t(vReal[i * g] * 60) + 100);
+            data1 = uint16_t(vReal1[i * g] * 0.1 * (4096 / 10)) + 100;
+            putdata(&data1, 1);
         }
     }
     else
     {
         double fix = 240 / (points + 20);
-        addpoint1(vReal, res, points + 20, baseFrequency[0], fix);
-        for (uint16_t i = 0; i < 240; i++)
+        addpoint1(vReal1, res, points + 20, baseFrequency[0], fix);
+        for (i = 0; i < 240; i++)
         {
-            uint16_t data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
+            data1 = uint16_t(res[240 - i] * 0.1 * (4096 / 10)) + 100;
             putdata((uint8_t *)&data1, 1);
         }
     }
@@ -97,12 +104,16 @@ void showpoint()
 
 void ffttest()
 {
-    arduinoFFT FFT = arduinoFFT(); /* Create FFT object */
-    sinx_init();
+    uint16_t i;
     unsigned long time = millis();
     /* Build raw data */
 
-    for (uint16_t i = 0; i < samples; i++)
+    for(i=0; i < 4096;i++)
+    {
+        vReal1[i] = vReal[i];
+    }
+
+    for (i = 0; i < samples; i++)
     {
         vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
@@ -116,7 +127,7 @@ void ffttest()
 
     baseFrequency[0] = x + 6;
 
-    for (int16_t i = 0; i < 5; i++)
+    for (i = 0; i < 5; i++)
     {
         baseFrequency[i] = (baseFrequency[0]) * (i + 1);
         uint16_t index = getPos(baseFrequency[i]);
@@ -124,15 +135,24 @@ void ffttest()
         range[i] = range[i] / (samples / 2);
     }
 
-    for (uint16_t i = 0; i < samples; i++)
+//    for (i = 0; i < samples; i++)
+//    {
+//        vReal[i] = vReal[i] / (samples / 2);
+//    }
+//
+//    PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
+
+    if(range[0] < 0.01)
     {
-        vReal[i] = vReal[i] / (samples / 2);
+        THD = 0;
+        range[0] = range[1] = range[2] = range[3] = range[4] = 0;
     }
 
-    PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
-
-    THD = sqrt(sq(range[1]) + sq(range[2]) + sq(range[3]) + sq(range[4])) / range[0];
-    THD = THD * 100;
+    else
+    {
+        THD = sqrt(sq(range[1]) + sq(range[2]) + sq(range[3]) + sq(range[4])) / range[0];
+        THD = THD * 100;
+    }
 
     putdata(eData, 3);
     printf2("t1.txt=\"%.2f%c\"", THD, '%');

@@ -47,8 +47,8 @@ void addpoint1(float *data, float *res, uint16_t count, float f, uint16_t fix)
     }
 }
 
-#define REF_LEN 5 //閸欏倽锟藉啯鏆熼幑顕�鏆辨惔锟�
-#define INTER 4   //閹绘帒锟藉吋鐦笟锟�
+#define REF_LEN 5
+#define INTER 4
 float sinx[INTER * REF_LEN][REF_LEN];
 void sinx_init()
 {

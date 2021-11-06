@@ -11,6 +11,7 @@
 #include <ti/drivers/Board.h>
 
 #include "FFT.h"
+#include "utils.h"
 #include "Energia.h"
 #include "printf.h"
 
@@ -28,9 +29,6 @@
 extern void *mainThread(void *arg0);
 extern void *init(void *arg0);
 extern void *led(void *arg0);
-
-/* Stack size in bytes */
-#define THREADSTACKSIZE 8192
 
 uint32_t g_ui32SysClock;
 
@@ -71,7 +69,7 @@ void putdata(uint8_t *data, uint32_t size)
 
 void putdata(char *data)
 {
-    putdata((uint8_t *)data, strlen(data));
+    putdata(data, strlen(data));
 }
 
 void putdata(char *data, uint32_t size)
@@ -106,7 +104,7 @@ void toesp(uint8_t *data, uint32_t size)
 
 void toesp(char *data)
 {
-    toesp((uint8_t *)data, strlen(data));
+    toesp(data, strlen(data));
 }
 
 void toesp(char *data, uint32_t size)
@@ -218,23 +216,25 @@ int main(void)
 
     Board_init();
 
-    adcinit();
-
     GPIO_setConfig(CONFIG_GPIO_LED_0, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 
     MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
     MAP_GPIOPinTypeGPIOInput(GPIO_PORTM_BASE, GPIO_PIN_7);
+    MAP_GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_5);
     GPIOM->PUR |= GPIO_PIN_7;
+    GPIOP->PUR |= GPIO_PIN_5;
     GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_7, 1);
+    GPIOPinWrite(GPIO_PORTP_BASE, GPIO_PIN_5, 1);
 
     /* Initialize the attributes structure with default values */
     pthread_attr_init(&attrs);
 
     /* Set priority, detach state, and stack size attributes */
-    priParam.sched_priority = 1;
+    priParam.sched_priority = 3;
     retc = pthread_attr_setschedparam(&attrs, &priParam);
     retc |= pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
+    retc |= pthread_attr_setstacksize(&attrs, 4096);
     if (retc != 0)
     {
         /* failed to set attributes */
@@ -258,7 +258,7 @@ int main(void)
     return (0);
 }
 
-void *init(void *arg0)
+void startTask1()
 {
     pthread_t thread;
     pthread_attr_t attrs;
@@ -272,16 +272,45 @@ void *init(void *arg0)
     priParam.sched_priority = 1;
     retc = pthread_attr_setschedparam(&attrs, &priParam);
     retc |= pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
+    retc |= pthread_attr_setstacksize(&attrs, 8196);
     if (retc != 0)
     {
         /* failed to set attributes */
         error();
     }
 
-    usart();
     retc = pthread_create(&thread, &attrs, mainThread, NULL);
+}
+
+void startTask2()
+{
+    pthread_t thread;
+    pthread_attr_t attrs;
+    struct sched_param priParam;
+    int retc;
+
+    /* Initialize the attributes structure with default values */
+    pthread_attr_init(&attrs);
+
+    /* Set priority, detach state, and stack size attributes */
+    priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&attrs, &priParam);
+    retc |= pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&attrs, 8196);
+    if (retc != 0)
+    {
+        /* failed to set attributes */
+        error();
+    }
     retc = pthread_create(&thread, &attrs, led, NULL);
+}
+
+void *init(void *arg0)
+{
+    usart();
+    startTask1();
+    startTask2();
+
     pthread_exit(0);
 }
 
@@ -309,7 +338,7 @@ void sendonce()
 
     for (i = 0; i < 4096; i++)
     {
-        test.u16 = (int16_t)(vReal[i] * 60);
+        test.u16 = (int16_t)(vReal1[i] * (4096 / 10));
         toesp(test.u8, 2);
     }
 
@@ -342,19 +371,33 @@ void *led(void *arg0)
     }
 }
 
+bool isRun = false;
+
 void *mainThread(void *arg0)
 {
+    sinx_init();
+    printf1("init done\r");
     for (;;)
     {
-        if (GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_7) == 0)
+        if (GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_7) == 0 ||
+                GPIOPinRead(GPIO_PORTP_BASE, GPIO_PIN_5) == 0)
         {
+            if(isRun)
+                continue;
+            printf1("start adc\r");
             adcstart();
+            isRun = true;
         }
         if (go)
         {
+            printf1("stop adc\r");
+            adcstop();
+            printf1("start fft\r");
             ffttest();
+            printf1("start send\r");
             sendonce();
             go = false;
+            isRun = false;
         }
         delay(50);
     }

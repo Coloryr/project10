@@ -25,6 +25,9 @@ const float refVoltage = 3.3f;
 
 uint_fast16_t index = 0, offset = 0;
 
+ADCBuf_Handle adcBuf;
+ADCBuf_Conversion continuousConversion;
+
 void adcBufCallback(ADCBuf_Handle handle, ADCBuf_Conversion *conversion,
                     void *completedADCBuffer, uint32_t completedChannel, int_fast16_t status)
 {
@@ -71,14 +74,11 @@ void adcBufCallback(ADCBuf_Handle handle, ADCBuf_Conversion *conversion,
     index++;
     if (index == 16)
     {
-        adcstop();
+        ADCBuf_convertCancel(adcBuf);
         go = true;
         index = 0;
     }
 }
-
-ADCBuf_Handle adcBuf;
-ADCBuf_Conversion continuousConversion;
 
 /*
  *  ======== mainThread ========
@@ -107,7 +107,7 @@ void adcinit()
 
     if (adcBuf == NULL)
     {
-        printf("ADCBuf failed to open.\n");
+        printf1("ADCBuf failed to open.\n");
         /* ADCBuf failed to open. */
         while (1)
             ;
@@ -116,12 +116,13 @@ void adcinit()
 
 void adcstart()
 {
+    adcinit();
     /* Start converting. */
     if (ADCBuf_convert(adcBuf, &continuousConversion, 1) !=
         ADCBuf_STATUS_SUCCESS)
     {
         /* Did not start conversion process correctly. */
-        printf("Did not start conversion process correctly.\n");
+        printf1("Did not start conversion process correctly.\n");
         while (1)
             ;
     }
@@ -129,5 +130,5 @@ void adcstart()
 
 void adcstop()
 {
-    ADCBuf_convertCancel(adcBuf);
+    ADCBuf_close(adcBuf);
 }

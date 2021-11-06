@@ -21,6 +21,7 @@ void setup()
     pinMode(GPIO_NUM_0, INPUT);
     pinMode(GPIO_NUM_2, OUTPUT);
     pinMode(GPIO_NUM_16, OUTPUT);
+    digitalWrite(GPIO_NUM_16, HIGH);
     xTaskCreate(ledtask, "led", 1024, NULL, 3, NULL);
     xTaskCreate(rbletask, "task", 8192 * 5, NULL, 1, NULL);
 }

@@ -14,6 +14,7 @@ extern float THD;
 extern float res[240];
 
 extern float vReal[samples];
+extern float vReal1[4096];
 
 union testU
 {
