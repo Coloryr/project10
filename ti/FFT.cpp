@@ -81,7 +81,7 @@ void showpoint()
     uint16_t i = 0;
     uint8_t data1;
     points = samplingFrequency / baseFrequency[0];
-    if (points > 100)
+    if (points >= 80)
     {
         uint16_t g = (points / 240) + 1;
         for (i = 0; i < 250; i++)

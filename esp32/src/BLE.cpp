@@ -127,7 +127,7 @@ void go()
 
     uint16_t all;
 
-    if (points > 100)
+    if (points >= 80)
     {
         uint16_t g = (points / 500) + 1;
         for (uint16_t i = 0; i < 500; i++)
