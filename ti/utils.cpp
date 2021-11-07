@@ -40,7 +40,7 @@ void addpoint1(float *data, float *res, uint16_t count, float f, uint16_t fix)
                 res[n] = y;
                 n++;
                 y = 0;
-                if (n >= 240)
+                if (n >= 300)
                     return;
             }
         }

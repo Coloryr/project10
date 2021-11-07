@@ -73,7 +73,7 @@ void PrintVector(float *vData, uint16_t bufferSize, uint8_t scaleType)
     printf1("\r");
 }
 
-float res[240];
+float res[300];
 uint8_t res1[240];
 
 void showpoint()
@@ -84,26 +84,27 @@ void showpoint()
     if (points > 100)
     {
         uint16_t g = (points / 240) + 1;
-        for (i = 0; i < 240; i++)
+        for (i = 0; i < 250; i++)
         {
-            res1[i] = uint16_t(vReal1[i * g] * -0.1 * (4096 / 10)) + 100;
+            res1[i] = uint16_t(vReal1[i * g] * -0.1 * (4096 / 10)) + 150;
         }
         for (i = 0; i < 240; i++)
         {
-            data1 = res1[i];
+            data1 = res1[239 - i];
             putdata(&data1, 1);
         }
     }
     else
     {
-        double fix = 240 / (points + 20);
-        addpoint1(vReal1, res, points + 20, baseFrequency[0], fix);
+        double fix = 300 / (points + 30);
+        addpoint1(vReal1, res, points + 30, baseFrequency[0], fix);
         for (i = 0; i < 240; i++)
         {
-            data1 = uint16_t(res[240 - i] * -0.1 * (4096 / 10)) + 100;
+            res1[i] = data1 = (uint16_t(res[260 - i] * -0.1 * (4096 / 10)) + 150);
             putdata((uint8_t *)&data1, 1);
         }
     }
+    delay(1);
 }
 
 void ffttest()

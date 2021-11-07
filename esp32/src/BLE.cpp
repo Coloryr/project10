@@ -132,7 +132,11 @@ void go()
         uint16_t g = (points / 500) + 1;
         for (uint16_t i = 0; i < 500; i++)
         {
-            data2[i] = uint8_t((data[i * g] + 500) * 0.1);
+            data2[i + 500] = uint8_t((data[i * g] + 500) * 0.1) + 50;
+        }
+        for (uint16_t i = 0; i < 500; i++)
+        {
+            data2[i] = data2[999 - i];
         }
         all = 500;
     }

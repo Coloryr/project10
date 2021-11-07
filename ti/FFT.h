@@ -11,7 +11,7 @@ extern float baseFrequency[5];
 extern uint16_t points;
 extern float range[5];
 extern float THD;
-extern float res[240];
+extern float res[300];
 
 extern float vReal[samples];
 extern float vReal1[4096];
