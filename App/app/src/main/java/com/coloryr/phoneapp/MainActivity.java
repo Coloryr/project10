@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
         nav = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(nav.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, nav, appBarConfiguration);
+
+//        activity.nav.navigate(R.id.navigation_second);
     }
 
     @Override

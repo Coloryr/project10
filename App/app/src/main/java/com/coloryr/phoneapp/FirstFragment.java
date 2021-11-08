@@ -68,6 +68,7 @@ public class FirstFragment extends Fragment {
         MainActivity.bluetooth.setReceiver(this::add);
         adapter.clear();
         if (!MainActivity.bluetooth.scan()) {
+            stop();
             isRun = false;
             return;
         }

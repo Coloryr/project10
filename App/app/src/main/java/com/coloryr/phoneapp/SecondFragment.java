@@ -33,6 +33,12 @@ public class SecondFragment extends Fragment {
     private TextView t4;
     private TextView t5;
 
+    private TextView t11;
+    private TextView t21;
+    private TextView t31;
+    private TextView t41;
+    private TextView t51;
+
     private Button button;
 
     private ImageView load;
@@ -52,6 +58,13 @@ public class SecondFragment extends Fragment {
         t3 = root.findViewById(R.id.text_3);
         t4 = root.findViewById(R.id.text_4);
         t5 = root.findViewById(R.id.text_5);
+
+        t11 = root.findViewById(R.id.text_1_1);
+        t21 = root.findViewById(R.id.text_2_1);
+        t31 = root.findViewById(R.id.text_3_1);
+        t41 = root.findViewById(R.id.text_4_1);
+        t51 = root.findViewById(R.id.text_5_1);
+
         button = root.findViewById(R.id.text_button);
         load = root.findViewById(R.id.list_load);
         button.setOnClickListener(v -> test());
@@ -76,6 +89,20 @@ public class SecondFragment extends Fragment {
         isRun = true;
         thread.start();
         test();
+
+//        float[] temp = new float[]{0.51233f, 0.12233f, 0.12323f, 0.23332f, 0.42123f};
+//        t1.setText("" + temp[0]);
+//        t2.setText("" + temp[1]);
+//        t3.setText("" + temp[2]);
+//        t4.setText("" + temp[3]);
+//        t5.setText("" + temp[4]);
+//
+//        t11.setText("" + 1.0f);
+//        t21.setText("" + temp[1] / temp[0]);
+//        t31.setText("" + temp[2] / temp[0]);
+//        t41.setText("" + temp[3] / temp[0]);
+//        t51.setText("" + temp[4] / temp[0]);
+
         return root;
     }
 
@@ -142,6 +169,13 @@ public class SecondFragment extends Fragment {
                             t3.setText("" + temp[2]);
                             t4.setText("" + temp[3]);
                             t5.setText("" + temp[4]);
+
+                            t11.setText("" + 1.0f);
+                            t21.setText("" + temp[1] / temp[0]);
+                            t31.setText("" + temp[2] / temp[0]);
+                            t41.setText("" + temp[3] / temp[0]);
+                            t51.setText("" + temp[4] / temp[0]);
+
                             stop();
                             button.setEnabled(true);
                         });
