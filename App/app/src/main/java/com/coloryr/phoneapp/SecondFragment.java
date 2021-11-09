@@ -170,11 +170,19 @@ public class SecondFragment extends Fragment {
                             t4.setText("" + temp[3]);
                             t5.setText("" + temp[4]);
 
-                            t11.setText("" + 1.0f);
-                            t21.setText("" + temp[1] / temp[0]);
-                            t31.setText("" + temp[2] / temp[0]);
-                            t41.setText("" + temp[3] / temp[0]);
-                            t51.setText("" + temp[4] / temp[0]);
+                            if (temp[0] != 0.0f) {
+                                t11.setText("" + 1.0f);
+                                t21.setText("" + temp[1] / temp[0]);
+                                t31.setText("" + temp[2] / temp[0]);
+                                t41.setText("" + temp[3] / temp[0]);
+                                t51.setText("" + temp[4] / temp[0]);
+                            } else {
+                                t11.setText("N/A");
+                                t21.setText("N/A");
+                                t31.setText("N/A");
+                                t41.setText("N/A");
+                                t51.setText("N/A");
+                            }
 
                             stop();
                             button.setEnabled(true);
